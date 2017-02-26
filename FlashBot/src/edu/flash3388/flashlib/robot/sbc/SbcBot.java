@@ -26,7 +26,7 @@ import io.silverspoon.bulldog.core.platform.Platform;
 
 import static edu.flash3388.flashlib.robot.FlashRoboUtil.*;
 
-public abstract class Robot {
+public abstract class SbcBot {
 	
 	public static final String PROP_USER_CLASS = "user.class";
 	public static final String PROP_SHUTDOWN_ON_EXIT = "board.shutdown";
@@ -95,13 +95,13 @@ public abstract class Robot {
 		saveLog();
 		
 		log("Loading user class...");
-		Robot userClass = null;
+		SbcBot userClass = null;
 		String userClassName = "";
 		try {
 			userClassName = properties.getProperty(PROP_USER_CLASS);
 			if(userClassName == null || userClassName.equals(""))
 				throw new ClassNotFoundException("User class missing! Must be set to "+PROP_USER_CLASS+" property");
-			userClass = (Robot) Class.forName(userClassName).newInstance();
+			userClass = (SbcBot) Class.forName(userClassName).newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			reportError(e.getMessage());
 			shutdown(1);
