@@ -121,4 +121,9 @@ public class Vector2 {
 	public static double angleBetween(Vector2 u, Vector2 v){
 		return Math.acos(u.dot(v) / (u.length() + v.length())) * Mathf.TO_DEGREES;
 	}
+	public static Vector2 polar(double magnitude, double azimuth){
+		double x = magnitude * Math.cos(azimuth * Mathf.TO_RADIANS);
+		double y = magnitude * Math.sin(azimuth * Mathf.TO_RADIANS);
+		return new Vector2(x, y);
+	}
 }

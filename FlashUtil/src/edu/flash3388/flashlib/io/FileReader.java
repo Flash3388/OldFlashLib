@@ -135,6 +135,8 @@ public class FileReader {
 		
 		if(n == -1){
 			endOfStream = true;
+			lines.add(currentLine);
+			currentLine = "";
 			return '\u0000';
 		}
 		
