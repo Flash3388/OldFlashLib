@@ -112,8 +112,8 @@ public class CvProcessing {
 		}
 		
 		private static Analysis detectObject(ProcessingParam param, List<MatOfPoint> contours) {
-			final double HEIGHT_DISTANCE_TO_CAMERA = 15.5;
-			final double HALF_ROBOT_IN_CM = 6.7;
+			//final double HEIGHT_DISTANCE_TO_CAMERA = 15.5;
+			//final double HALF_ROBOT_IN_CM = 6.7;
 			Analysis ret = getCenterOfTarget(contours, param);
 			
 			if(ret == null){
