@@ -11,11 +11,12 @@ public abstract class Sendable {
 		public static final byte STRING = 0x07;
 		public static final byte LOG = 0x08;
 		public static final byte TESTER = 0x09;
-		public static final byte MOTOR = 0x10;
-		public static final byte VISION = 0x11;
-		public static final byte DNAVX = 0x12;
-		public static final byte RSHELL = 0x13;
-		public static final byte PDP = 0x14;
+		public static final byte MOTOR = 0xa;
+		public static final byte VISION = 0xb;
+		public static final byte DNAVX = 0xc;
+		public static final byte RSHELL = 0xd;
+		public static final byte PDP = 0xe;
+		public static final byte SLIDER = 0x10;
 		
 		public static final int TYPE_DASHBOARD = 0x01;
 		public static final int TYPE_SBC = 0x01 << 1;
@@ -28,6 +29,7 @@ public abstract class Sendable {
 			this.type = type;
 		}
 		
+		public static final Type Slider = new Type(SLIDER, TYPE_DASHBOARD);
 		public static final Type Pdp = new Type(PDP, TYPE_BOTH);
 		public static final Type RemoteShell = new Type(RSHELL, TYPE_SBC);
 		public static final Type DashboardNavx = new Type(DNAVX, TYPE_DASHBOARD);
