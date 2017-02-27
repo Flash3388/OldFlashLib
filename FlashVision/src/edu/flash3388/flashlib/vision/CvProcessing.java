@@ -422,8 +422,7 @@ public class CvProcessing {
 				if(impossibleRectProperties(target, r))
 					continue;
 				
-				for(int j = 0; j < contours.size() && !foundBest; j++)
-				{
+				for(int j = 0; j < contours.size() && !foundBest; j++){
 					if(i == j)
 						continue;
 					c2 = contours.get(j);
@@ -482,7 +481,7 @@ public class CvProcessing {
 			best = new Scores();
 			best.center = new Point(r.x+r.width+(r2.x - (r.x + r.width))/2, r.y + r.height + (r2.y - (r.y + r.height)) / 2);
 			bestavg = avg;
-			//best.distanceToTarget = measureDistance(r.tl(), r2.br(), 26.14278582, targetHeight);
+			best.distanceToTarget = measureDistance(r.tl(), r2.br(), 19.14278582, targetHeight);
 			
 			//best.PixelsToCmRatio = r2.height/targetHeight;
 			return best;
