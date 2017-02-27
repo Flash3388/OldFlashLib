@@ -75,7 +75,7 @@ public class Flashboard {
 	}
 	
 	public static void init(CommInfo info){
-		if(!instance){
+		if(!instance || info == null){
 			try {
 				communications = new Communications("Flashboard", new UDPReadInterface(info.localPort), true);
 			} catch (SocketException e) {

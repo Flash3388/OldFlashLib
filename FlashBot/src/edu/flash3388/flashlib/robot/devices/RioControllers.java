@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.robot.devices;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import com.ctre.CANTalon;
@@ -30,7 +31,7 @@ public class RioControllers implements FlashSpeedController{
 	 * @param c An instance of the FlashSpeedController class representing the motor controller.
 	 */
 	public RioControllers(SpeedController c){
-		this(c, null);
+		this(Arrays.asList(c));
 	}
 	public RioControllers(int front, int back, ControllerType t){
 		this(controllerFromType(t, front), controllerFromType(t, back));

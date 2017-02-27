@@ -12,8 +12,10 @@ import edu.flash3388.flashlib.communications.CommInfo;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.ReadInterface;
 import edu.flash3388.flashlib.communications.UDPReadInterface;
+import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.ShellExecutor;
+import edu.flash3388.flashlib.robot.flashboard.Flashboard;
 import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.Properties;
 import io.silverspoon.bulldog.core.io.IOPort;
@@ -32,6 +34,7 @@ public abstract class SbcBot {
 	public static final String PROP_SHUTDOWN_ON_EXIT = "board.shutdown";
 	public static final String PROP_COMM_PORT = "board.commport";
 	public static final String PROP_COMM_TYPE = "board.commtype";
+	public static final String PROP_FLASHBOARD_INIT = "lib.flashboard.init";
 	
 	private static final String NATIVE_LIBRARY_NAME = "";
 	private static final String PROPERTIES_FILE = "robot.ini";
@@ -50,20 +53,6 @@ public abstract class SbcBot {
 		Log.init();
 		logTime("Initializing robot...");
 		
-		log("Loading settings...");
-		File file = new File(PROPERTIES_FILE);
-		if(file.exists())
-			properties.loadFromFile(PROPERTIES_FILE);
-		else{
-			try {
-				file.createNewFile();
-			} catch (IOException e) {}
-			loadDefaultSettings();
-		}
-		loadSettings(args);
-		properties.saveToFile(PROPERTIES_FILE);
-		printSettings();
-		
 		log("Setting up shutdown hook...");
 		Runtime.getRuntime().addShutdownHook(new Thread(()->onShutdown()));
 		log("Done");
@@ -73,8 +62,24 @@ public abstract class SbcBot {
 		executor = new ShellExecutor();
 		log("Done :: board-name="+getBoardName());
 		
+		log("Loading settings...");
+		File file = new File(PROPERTIES_FILE);
+		if(file.exists())
+			properties.loadFromFile(PROPERTIES_FILE);
+		else{
+			try {
+				file.createNewFile();
+			} catch (IOException e) {}
+		}
+		loadDefaultSettings();
+		loadSettings(args);
+		properties.saveToFile(PROPERTIES_FILE);
+		printSettings();
+		
 		log("Initializing FlashLib...");
-		initFlashLib(FLASHBOARD_INIT | SCHEDULER_INIT, RobotFactory.ImplType.SBC);
+		int initcode = SCHEDULER_INIT | 
+				(getProperties().getBooleanProperty(PROP_FLASHBOARD_INIT)? FLASHBOARD_INIT : 0);
+		initFlashLib(initcode, RobotFactory.ImplType.SBC);
 		
 		log("Initializing Communications...");
 		ReadInterface inter = null;
@@ -88,7 +93,6 @@ public abstract class SbcBot {
 		}
 		communications = new Communications("Robot", inter, true);
 		communications.attach(executor);
-		communications.start();
 		log("Done");
 		
 		logTime("Initialization Done");
@@ -109,6 +113,8 @@ public abstract class SbcBot {
 		log("User class instantiated: "+userClassName);
 		
 		logTime("Starting Robot");
+		if(Flashboard.flashboardInit())
+			FlashRoboUtil.startFlashboard();
 		userClass.startRobot();
 	}
 	private static ReadInterface setupCommInterface() throws SocketException{
@@ -135,9 +141,14 @@ public abstract class SbcBot {
 		}
 	}
 	private static void loadDefaultSettings(){
-		properties.putBooleanProperty(PROP_SHUTDOWN_ON_EXIT, false);
-		properties.putIntegerProperty(PROP_COMM_PORT, getPortByBoard());
-		properties.putProperty(PROP_COMM_TYPE, "udp");
+		if(properties.getProperty(PROP_SHUTDOWN_ON_EXIT) == null)
+			properties.putBooleanProperty(PROP_SHUTDOWN_ON_EXIT, false);
+		if(properties.getProperty(PROP_COMM_PORT) == null)
+			properties.putIntegerProperty(PROP_COMM_PORT, getPortByBoard());
+		if(properties.getProperty(PROP_COMM_TYPE) == null)
+			properties.putProperty(PROP_COMM_TYPE, "udp");
+		if(properties.getProperty(PROP_FLASHBOARD_INIT) == null)
+			properties.putBooleanProperty(PROP_FLASHBOARD_INIT, true);
 	}
 	private static void onShutdown(){
 		logTime("Shuting down...");
@@ -180,7 +191,7 @@ public abstract class SbcBot {
 				 values = properties.values();
 		String print = "Settings:\n";
 		for (int i = 0; i < values.length; i++) 
-			print += "\r"+keys[i]+"="+values[i];
+			print += "\t"+keys[i]+"="+values[i]+"\n";
 		log(print);
 	}
 	public static void setProperty(String property, String value){

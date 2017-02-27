@@ -17,5 +17,6 @@
 	<classpathentry kind="var" path="wpilib" sourcepath="wpilib.sources"/>
 	<classpathentry kind="var" path="wpilib.sources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/bulldog"/>
+	<classpathentry kind="lib" path="/root/slf4j/slf4j-1.7.21/slf4j-api-1.7.21.jar" sourcepath="/root/slf4j/slf4j-1.7.21/slf4j-api-1.7.21-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

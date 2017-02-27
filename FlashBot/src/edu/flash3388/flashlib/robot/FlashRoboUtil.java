@@ -67,9 +67,8 @@ public class FlashRoboUtil {
 		
 		if((mode & (FLASHBOARD_INIT)) != 0){
 			Flashboard.init(implType.equals(RobotFactory.ImplType.RIO)? CommInfo.Roborio2Flashboard :
-				null);
+				CommInfo.Roborio2Flashboard);
 			Flashboard.attach(new SendableLog());
-			Flashboard.start();
 		}
 		if((mode & (SCHEDULER_INIT)) != 0){
 			Scheduler.init();
@@ -79,5 +78,8 @@ public class FlashRoboUtil {
 		
 		initCode = mode;
 		init = true;
+	}
+	public static void startFlashboard(){
+		Flashboard.start();
 	}
 }

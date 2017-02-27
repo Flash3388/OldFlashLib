@@ -264,14 +264,6 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 				(sinD * magnitude - rotation),// rear right
 		};
 
-		String log = "";
-		for (int i = 0; i < wheelSpeeds.length && scaleVoltage; i++){
-			wheelSpeeds[i] = scaleForVoltage(wheelSpeeds[i]);
-			log += "W "+i+": "+wheelSpeeds[i];
-		}
-		if(!log.equals(""))
-			Log.log(log);
-
 		normalize(wheelSpeeds);
 
 		front_left.set(wheelSpeeds[0]);
