@@ -5,13 +5,13 @@ import edu.flash3388.flashlib.communications.SendableData;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 
-public abstract class RemoteVisionRunner extends Sendable implements Vision{
+public abstract class VisionRunner extends Sendable implements Vision{
 
 	private static class VisionRunnerTask implements Runnable{
 		private boolean stop = false;
-		private RemoteVisionRunner runner;
+		private VisionRunner runner;
 		
-		public VisionRunnerTask(RemoteVisionRunner v){
+		public VisionRunnerTask(VisionRunner v){
 			this.runner = v;
 		}
 		
@@ -64,12 +64,18 @@ public abstract class RemoteVisionRunner extends Sendable implements Vision{
 	private VisionRunnerTask runTask;
 	private RunnerSendableData data;
 	
-	public RemoteVisionRunner(String name, int id) {
+	public VisionRunner(String name, int id) {
 		super(name, id, Type.Vision);
 		
 		runTask = new VisionRunnerTask(this);
-		visionThread = new Thread(runTask, "VisionRunner");
+		visionThread = new Thread(runTask, name);
 		data = new RunnerSendableData(this);
+	}
+	public VisionRunner(String name){
+		this(name, -1);
+	}
+	public VisionRunner(){
+		this("VisionRunner");
 	}
 
 	@Override

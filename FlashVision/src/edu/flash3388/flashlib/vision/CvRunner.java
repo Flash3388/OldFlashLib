@@ -2,13 +2,19 @@ package edu.flash3388.flashlib.vision;
 
 import org.opencv.core.Mat;
 
-public class CvRemoteRunner extends RemoteVisionRunner implements ImagePipeline{
+public class CvRunner extends VisionRunner implements ImagePipeline{
 
 	private Mat[] frames = new Mat[2];
 	private int frameIndex = 0;
 	
-	public CvRemoteRunner(String name, int id) {
+	public CvRunner(String name, int id) {
 		super(name, id);
+	}
+	public CvRunner(String name){
+		super(name);
+	}
+	public CvRunner(){
+		super();
 	}
 
 	@Override
