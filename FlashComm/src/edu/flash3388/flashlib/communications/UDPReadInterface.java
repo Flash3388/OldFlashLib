@@ -118,7 +118,13 @@ public class UDPReadInterface implements ReadInterface{
 	public boolean boundAsServer(){
 		return server;
 	}
-	public void setRemoteInetAddress(InetAddress d){
-		outInet = d;
+	public int getLocalPort(){
+		return socket.getLocalPort();
+	}
+	public int getRemotePort(){
+		return portOut;
+	}
+	public InetAddress getRemoteAddress(){
+		return outInet;
 	}
 }
