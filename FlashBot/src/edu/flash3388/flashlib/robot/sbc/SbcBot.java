@@ -30,6 +30,26 @@ import static edu.flash3388.flashlib.robot.FlashRoboUtil.*;
 
 public abstract class SbcBot {
 	
+	public static enum SbcState{
+		Disabled((byte)0x01), Enabled((byte)0x02);
+		
+		public final byte value;
+		SbcState(byte value){
+			this.value = value;
+		}
+		
+		public static final byte DISABLED = 0x01;
+		public static final byte ENABLED = 0x02;
+		
+		public static SbcState byValue(byte val){
+			switch (val) {
+				case DISABLED: return SbcState.Disabled;
+				case ENABLED: return SbcState.Enabled;
+			}
+			return null;
+		}
+	}
+	
 	public static final String PROP_USER_CLASS = "user.class";
 	public static final String PROP_SHUTDOWN_ON_EXIT = "board.shutdown";
 	public static final String PROP_COMM_PORT = "board.commport";
@@ -42,6 +62,9 @@ public abstract class SbcBot {
 	private static Board board;
 	private static ShellExecutor executor;
 	private static Communications communications;
+	private static SbcState currentState;
+	private static StateSelector stateSelector;
+	private static SbcBot userImplement;
 	private static Properties properties = new Properties();
 
 	public static void main(String[] args){
@@ -115,6 +138,9 @@ public abstract class SbcBot {
 		logTime("Starting Robot");
 		if(Flashboard.flashboardInit())
 			FlashRoboUtil.startFlashboard();
+		currentState = SbcState.Disabled;
+		userImplement = userClass;
+		communications.start();
 		userClass.startRobot();
 	}
 	private static ReadInterface setupCommInterface() throws SocketException{
@@ -152,7 +178,10 @@ public abstract class SbcBot {
 	}
 	private static void onShutdown(){
 		logTime("Shuting down...");
-		
+		if(userImplement != null){
+			log("User shutdown...");
+			userImplement.stopRobot();
+		}
 		if(schedulerHasInstance())
 			disableScheduler(true);
 		if(communications != null){
@@ -204,6 +233,20 @@ public abstract class SbcBot {
 		return properties;
 	}
 	
+	public static SbcState currentState(){
+		if (stateSelector != null) {
+			SbcState nState = stateSelector.getState();
+			currentState = nState != null? nState : SbcState.Disabled;
+		}
+		return currentState;
+	}
+	public static boolean isDisabled(){
+		return currentState.value == SbcState.DISABLED;
+	}
+	public static boolean isEnabled(){
+		return currentState.value == SbcState.ENABLED;
+	}
+	
 	public static ShellExecutor shell(){
 		return executor;
 	}
@@ -236,4 +279,5 @@ public abstract class SbcBot {
 	}
 	
 	protected abstract void startRobot();
+	protected abstract void stopRobot();
 }
