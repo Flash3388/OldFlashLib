@@ -96,6 +96,9 @@ public class CameraServer {
 	public int getRemotePort(){
 		return sendPort;
 	}
+	public InetAddress getRemoteAddress(){
+		return sendAddress;
+	}
 	public Camera getCamera(){
 		return camera;
 	}

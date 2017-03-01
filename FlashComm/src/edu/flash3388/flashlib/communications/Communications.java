@@ -21,7 +21,7 @@ public class Communications {
 		public void run() {
 			try{
 				while(!stop){
-					Log.logTime(comm.logName+": Searching for remote dashboard");
+					Log.logTime(comm.logName+": Searching for remote connection");
 					while(!comm.connect() && !stop);
 					if(stop) break;
 					
@@ -232,6 +232,9 @@ public class Communications {
 	}
 	public String getName(){
 		return name;
+	}
+	public ReadInterface getReadInterface(){
+		return readInterface;
 	}
 	public boolean connect() throws IOException{
 		if(connected) return true;
