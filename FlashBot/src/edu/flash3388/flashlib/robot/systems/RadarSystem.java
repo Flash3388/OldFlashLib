@@ -3,20 +3,24 @@ package edu.flash3388.flashlib.robot.systems;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.math.Vector2;
 import edu.flash3388.flashlib.robot.devices.RangeFinder;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class RadarSystem{
 	public static class RadarNode{
+		public static final double DEFAULT_MAX_RANGE = 400;//cm
 		private double angle;
 		private RangeFinder ranger;
-		private double range = 0;
+		private double range = 0, maxRange;
 		
-		public RadarNode(RangeFinder ranger, double angle){
+		public RadarNode(RangeFinder ranger, double angle, double maxRange){
 			this.angle = angle;
 			this.ranger = ranger;
+			this.maxRange = maxRange;
+		}
+		public RadarNode(RangeFinder ranger, double angle){
+			this(ranger, angle, DEFAULT_MAX_RANGE);
 		}
 		
 		public double getAngleOffset(){
@@ -33,6 +37,8 @@ public class RadarSystem{
 		}
 		public void updateRange(){
 			range = ranger.getRangeCM();
+			if(range > maxRange)
+				range = -1;
 		}
 	}
 	public static class UpdateTask implements Runnable{
@@ -126,9 +132,8 @@ public class RadarSystem{
 	}
 	public Vector2 getClosestRangeTo(double angle){
 		RadarNode node = getClosestNodeTo(angle);
-		if(node != null)
-			return new Vector2(Mathf.getX(node.getRange(), node.getAngleOffset()), 
-					Mathf.getY(node.getRange(), node.getAngleOffset()));
+		if(node != null) 
+			return Vector2.polar(node.getRange(), node.getAngleOffset());
 		return null;
 	}
 	public Vector2[] getRanges(){
@@ -136,8 +141,7 @@ public class RadarSystem{
 		int i = 0;
 		for (Enumeration<RadarNode> nodeEnum = nodes.elements(); nodeEnum.hasMoreElements();){
 			RadarNode node = nodeEnum.nextElement();
-			ranges[i++] = new Vector2(Mathf.getX(node.getRange(), node.getAngleOffset()), 
-					Mathf.getY(node.getRange(), node.getAngleOffset()));
+			ranges[i++] = Vector2.polar(node.getRange(), node.getAngleOffset());
 		}
 		return ranges;
 	}

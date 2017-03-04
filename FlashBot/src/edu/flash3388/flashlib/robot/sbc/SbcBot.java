@@ -147,7 +147,7 @@ public abstract class SbcBot {
 		int port = properties.getIntegerProperty(PROP_COMM_PORT);
 		if(port <= 0) return null;
 		String interfaceType = properties.getProperty(PROP_COMM_TYPE);
-		if(interfaceType.equals("udp"))
+		if(interfaceType.equalsIgnoreCase("udp"))
 			return new UDPReadInterface(port);
 		return null;
 	}
