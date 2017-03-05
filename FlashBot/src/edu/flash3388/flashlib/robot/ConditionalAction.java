@@ -3,6 +3,7 @@ package edu.flash3388.flashlib.robot;
 import java.util.Enumeration;
 
 import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
+import edu.flash3388.flashlib.util.Log;
 
 public class ConditionalAction extends Action {
 
@@ -13,17 +14,40 @@ public class ConditionalAction extends Action {
 		this.condition = condition;
 		this.actionTrue = aTrue;
 		this.actionFalse = aFalse;
-		
-		Enumeration<System> requirements = actionTrue.getRequirements();
-		while (requirements.hasMoreElements()) {
-			System system = requirements.nextElement();
-			requires(system);
+	}
+	
+	private void validateRequirements(Enumeration<System> systems){
+		resetRequirements();
+		for (; systems.hasMoreElements();) {
+			System s = systems.nextElement();
+			if(s != null)
+				requires(s);
 		}
+	}
+	
+	public void setConditionSource(BooleanDataSource source){
+		this.condition = source;
+	}
+	public void setActionOnTrue(Action action){
+		actionTrue = action;
+	}
+	public void setActionOnFalse(Action action){
+		actionFalse = action;
+	}
+	
+	@Override
+	public void start(){
+		if(condition == null){
+			Log.reportError("Missing condition source");
+			return;
+		}
+		runAction = condition.get()? actionTrue : actionFalse;
+		validateRequirements(runAction.getRequirements());
+		super.start();
 	}
 	
 	@Override
 	protected void initialize(){ 
-		runAction = condition.get()? actionTrue : actionFalse;
 		runAction.initialize();
 	}
 	@Override
