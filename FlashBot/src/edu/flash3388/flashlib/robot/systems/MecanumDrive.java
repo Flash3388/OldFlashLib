@@ -254,9 +254,8 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 		double cosD = Math.cos(dirInRad);
 		double sinD = Math.sin(dirInRad);
 
-		if (stabilizing && rotation == 0){
+		if (stabilizing && rotation == 0)
 			rotation = stabilizer.stabilizeByRotation(magnitude, direction);
-		}
 		
 		double wheelSpeeds[] = { (sinD * magnitude + rotation), // front left
 				(cosD * magnitude - rotation), // front right
