@@ -35,12 +35,12 @@ public class FlashUtil {
 	}
 	
 	//--------------------------------------------------------------------
-	//--------------------------Prints------------------------------------
+	//--------------------------Arrays------------------------------------
 	//--------------------------------------------------------------------
-		
-	public static void printArray(String[] s){
-		for(String str : s)
-			System.out.println(str);
+	
+	public static void printArray(byte[] s){
+		for(byte i : s)
+			System.out.println((int)i);
 	}
 	public static void printArray(int[] s){
 		for(int i : s)
@@ -65,6 +65,49 @@ public class FlashUtil {
 	public static <T> void printArray(T[] s){
 		for(T f : s)
 			System.out.println(f);
+	}
+	
+	public static void shiftArrayL(int[] arr, int start, int end){
+		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
+			throw new IllegalArgumentException("Illegal shift arguments");
+		for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];
+	}
+	public static void shiftArrayL(double[] arr, int start, int end){
+		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
+			throw new IllegalArgumentException("Illegal shift arguments");
+		for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];
+	}
+	public static void shiftArrayL(float[] arr, int start, int end){
+		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
+			throw new IllegalArgumentException("Illegal shift arguments");
+		for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];
+	}
+	public static void shiftArrayL(long[] arr, int start, int end){
+		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
+			throw new IllegalArgumentException("Illegal shift arguments");
+		for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];
+	}
+	public static void shiftArrayL(byte[] arr, int start, int end){
+		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
+			throw new IllegalArgumentException("Illegal shift arguments");
+		for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];
+	}
+	public static void shiftArrayL(short[] arr, int start, int end){
+		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
+			throw new IllegalArgumentException("Illegal shift arguments");
+		for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];
+	}
+	public static <T> void shiftArrayL(T[] arr, int start, int end){
+		if(start > end || end > arr.length || start > arr.length || start < 0 || end < 0)
+			throw new IllegalArgumentException("Illegal shift arguments");
+		for (int i = start; i < end; i++) 
+			arr[i] = arr[i+1];
 	}
 	
 	//--------------------------------------------------------------------

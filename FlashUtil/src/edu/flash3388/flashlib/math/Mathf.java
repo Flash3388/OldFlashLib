@@ -107,7 +107,7 @@ public class Mathf {
 	 * @return
 	 */
 	public static double pythagorasTheorem(double a, double b, double c){
-		return  Math.sqrt((a * a) + (b * b) + (c * c));
+		return Math.sqrt((a * a) + (b * b) + (c * c));
 	}
 	/**
 	 * Gets the result of Pythagorases theorem for a given set of numbers.
@@ -391,7 +391,7 @@ public class Mathf {
 	}
 	public static double trapezoidalRule(Function func, double min, double max, int trapezoids){
 		double h = (max - min) / trapezoids;
-		double s = 0.5f * (func.f(min) + func.f(max));
+		double s = 0.5 * (func.f(min) + func.f(max));
 		for(int i = 1; i < trapezoids; i++)
 			s += func.f(min + i * h); 
 		return (s * h);

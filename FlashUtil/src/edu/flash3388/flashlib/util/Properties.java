@@ -33,6 +33,9 @@ public class Properties {
 		return getValuesCollection().toArray(new String[0]);
 	}
 	
+	public boolean hasProperty(String prop){
+		return getProperty(prop) != null;
+	}
 	public String getProperty(String prop){
 		return properties.get(prop);
 	}

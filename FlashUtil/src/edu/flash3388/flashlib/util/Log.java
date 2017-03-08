@@ -9,22 +9,24 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import edu.flash3388.flashlib.util.Queue;
+
 /**
  * Allows to log certain events in a file on the robot.
  * 
  * @author Tom Tzook.
  */
 public class Log{
-
-	public static final String DIRECTORY = "logs/";
 	
 	private static Log instance;
+	private static String parentDirectory = "";
 	private static Vector<LoggingInterface> loggingInterfaces = new Vector<LoggingInterface>(2);
 	
 	private String name = "log";
 	private String extension = ".flog";
-	private String directory = DIRECTORY + "log_";
+	private String directory = "logs/log_";
 	
+	private Queue<String> logLines, errorLines;
 	private File logFile, errorFile;
 	private FileWriter writer;
 	private FileWriter error_writer;
@@ -43,6 +45,8 @@ public class Log{
 		while(logFile.exists())
 			logFile = new File(directory + name + (counter++) + extension);
 		
+		logLines = new Queue<String>(100);
+		errorLines = new Queue<String>(100);
 		try {
 			logFile.createNewFile();
 			writer = new FileWriter(logFile);
@@ -59,34 +63,19 @@ public class Log{
 	
 	public void write(String mess){
 		if(isClosed()) return;
-		try {
-			writer.write(mess + "\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		logLines.enqueue(mess);
 	}
 	
 	public void writeError(String mess){
 		if(isClosed()) return;
 		mess = (FlashUtil.secs()) + ": " + mess;
-		try {
-			error_writer.write(mess + "\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		errorLines.enqueue(mess);
 	}
 	
 	public void close(){
 		if(isClosed()) return;
-		try {
-			writer.flush();
-			writer.close();
-			error_writer.flush();
-			error_writer.close();
-			closed = true;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		save();
+		closed = true;
 	}
 	public void delete(){
 		if(!isClosed())
@@ -97,9 +86,28 @@ public class Log{
 	public void save(){
 		if(isClosed()) return;
 		try {
-			close();
+			String[] lines = logLines.toArray(new String[0]);
+			logLines.clear();
+			
 			writer = new FileWriter(logFile);
+			for (int i = 0; i < lines.length; i++) {
+				String line = lines[i];
+				writer.write(line+"\n");
+			}
+			writer.flush();
+			writer.close();
+			
+			lines = errorLines.toArray(new String[0]);
+			errorLines.clear();
+			
 			error_writer = new FileWriter(errorFile);
+			for (int i = 0; i < lines.length; i++) {
+				String line = lines[i];
+				error_writer.write(line+"\n");
+			}
+			error_writer.flush();
+			error_writer.close();
+			
 			closed = false;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -179,5 +187,10 @@ public class Log{
 	
 	public static void addLoggingInterface(LoggingInterface in){
 		loggingInterfaces.addElement(in);
+	}
+	public static void setParentDirectory(String directory){
+		parentDirectory = directory;
+		if(!parentDirectory.endsWith("/"))
+			parentDirectory += "/";
 	}
 }
