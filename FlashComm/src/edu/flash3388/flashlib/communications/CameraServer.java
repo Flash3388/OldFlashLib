@@ -28,7 +28,9 @@ public class CameraServer {
 				server.sendPort = packet.getPort();
 				
 				byte[] checkBytes = FlashUtil.toByteArray(1);
-				long period = (long) (1000 / (1.0 * 30)), lastCheck = System.currentTimeMillis();
+				long period = (server.camera == null || server.camera.getFPS() <= 5? DEFAULT_PERIOD : 
+					server.camera.getFPS()), 
+						lastCheck = System.currentTimeMillis();
 				while(!server.stop){
 					long t0 = System.currentTimeMillis();
 					
@@ -43,7 +45,7 @@ public class CameraServer {
 		            if (dt < period)
 		            	FlashUtil.delay(dt);
 		            
-		            if(System.currentTimeMillis() - lastCheck > 2000){
+		            if(System.currentTimeMillis() - lastCheck > CHECK_PERIOD){
 		            	server.socket.send(new DatagramPacket(checkBytes, 4, server.sendAddress, server.sendPort));
 				       
 				        packet = new DatagramPacket(bytes, bytes.length);
@@ -59,6 +61,9 @@ public class CameraServer {
 			}
 		}
 	}
+	
+	private static final long CHECK_PERIOD = 2000;
+	private static final long DEFAULT_PERIOD = (long) (1000 / 30.0);
 	
 	private Thread runThread;
 	private DatagramSocket socket;

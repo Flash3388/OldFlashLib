@@ -12,6 +12,8 @@ public class Communications {
 	private static class CommTask implements Runnable{
 		boolean stop = false;
 		private Communications comm;
+		private long timeLastTimeout = -1;
+		private int maxTimeouts = 3;
 		
 		public CommTask(Communications comm){
 			this.comm = comm;
@@ -25,28 +27,36 @@ public class Communications {
 					while(!comm.connect() && !stop);
 					if(stop) break;
 					
-					comm.readInterface.setReadTimeout(READ_TIMEOUT);
 					Log.logTime(comm.logName+": Connected");
 					comm.resetAll();
-					comm.lastRead = FlashUtil.millis();
+					comm.updateClock();
+					comm.lastRead = comm.readClock();
 					int timeouts = 0;
-					while(comm.connected){
+					while(comm.isConnected()){
 						comm.writeHandshake();
 						
 						comm.sendAll();
 						comm.read();
 						
-						if(comm.lastRead != -1 && FlashUtil.millis() - comm.lastRead > CONNECTION_TIMEOUT){
+						comm.updateClock();
+						
+						if(comm.connectionTimedout()){
 							timeouts++;
 							Log.logTime(comm.logName+": TIMEOUT " + timeouts);
-							comm.lastRead = FlashUtil.millis();
+							comm.lastRead = comm.readClock();
+							timeLastTimeout = comm.readClock();
 						}
-						if(timeouts >= 3){
+						if(timeouts >= maxTimeouts){
 							Log.logTime(comm.logName+": Connection lost");
 							comm.connected = false;
 							break;
 						}
-						
+						if(timeLastTimeout != -1 && 
+								comm.readClock() - timeLastTimeout > (comm.connectionTimeout*3)){
+							timeouts = 0;
+							timeLastTimeout = -1;
+							Log.logTime(comm.logName+": Timeout Reset");
+						}
 						comm.writeHandshake();
 						FlashUtil.delay(1);
 					}
@@ -63,7 +73,7 @@ public class Communications {
 		}
 	}
 	
-	public static final long CONNECTION_TIMEOUT = 1000;
+	public static final int CONNECTION_TIMEOUT = 1000;
 	public static final int READ_TIMEOUT = 20;
 	public static final int MAX_REC_LENGTH = 100;
 	public static final byte[] HANDSHAKE = {0x01, 0x00, 0x01};
@@ -72,7 +82,9 @@ public class Communications {
 	private Vector<Sendable> sendables;
 	
 	private boolean connected = false, server;
-	private long lastRead = -1;
+	private long lastRead = -1, currentMillis = -1, readStart = -1;
+	private int connectionTimeout;
+	private int readTimeout;
 	private Packet packet = new Packet();
 	private ReadInterface readInterface;
 	private SendableCreator sendableCreator;
@@ -88,11 +100,14 @@ public class Communications {
 		this.readInterface = readIn;
 		this.logName = name+"-Comm";
 		
+		setReadTimeout(READ_TIMEOUT);
+		setConnectionTimeout(CONNECTION_TIMEOUT);
+		
 		initializeConcurrency();
 		Log.logTime(logName+": Initialized");
 		
 		sendables = new Vector<Sendable>();
-		readInterface.setMaxBufferSize(MAX_REC_LENGTH);
+		setBufferSize(MAX_REC_LENGTH);
 		readInterface.open();
 	}
 	public Communications(ReadInterface readIn, boolean server){
@@ -110,8 +125,9 @@ public class Communications {
 	}
 	private void read(){//ID|VALUE
 		if(!connected) return;
-		long start = FlashUtil.millis();
-		while(FlashUtil.millis() - start < READ_TIMEOUT){
+		updateClock();
+		readStart = currentMillis;
+		while(!readTimedout()){
 			Packet packet = receivePacket();
 			if(packet == null || packet.length < 1)
 				return;
@@ -133,6 +149,7 @@ public class Communications {
 					sen.setAttached(true);
 				}
 			}
+			updateClock();
 		}
 	}
 	private void resetAll(){
@@ -174,6 +191,22 @@ public class Communications {
 		}
 	}
 	
+	private void updateClock(){
+		currentMillis = FlashUtil.millis();
+	}
+	private boolean readTimedout(){
+		if(currentMillis == -1)
+			currentMillis = FlashUtil.millis();
+		return readStart != -1 && currentMillis - readStart > readTimeout;
+	}
+	private boolean connectionTimedout(){
+		if(currentMillis == -1)
+			currentMillis = FlashUtil.millis();
+		return lastRead != -1 && currentMillis - lastRead > connectionTimeout;
+	}
+	private long readClock(){
+		return currentMillis;
+	}
 	private void writeHandshake(){
 		write(HANDSHAKE);
 	}
@@ -247,15 +280,33 @@ public class Communications {
 			connected = false;
 		}
 	}
-	public void close(){
-		disconnect();
-		readInterface.close();
-	}
 	public boolean isConnected(){
 		return connected;
 	}
+	public void setMaxTimeoutsCount(int timeouts){
+		commTask.maxTimeouts = timeouts;
+	}
+	public int getMaxTimeoutsCount(){
+		return commTask.maxTimeouts;
+	}
+	public void setConnectionTimeout(int timeout){
+		connectionTimeout = timeout;
+	}
+	public int getConnectionTimeout(){
+		return connectionTimeout;
+	}
+	public void setReadTimeout(int timeout){
+		readTimeout = timeout;
+		readInterface.setReadTimeout(readTimeout);
+	}
+	public int getReadTimeout(){
+		return readTimeout;
+	}
 	public void setSendableCreator(SendableCreator creator){
 		sendableCreator = creator;
+	}
+	public void setBufferSize(int size){
+		readInterface.setMaxBufferSize(size);
 	}
 	public SendableCreator getSendableCreator(){
 		return sendableCreator;
@@ -264,7 +315,7 @@ public class Communications {
 		if(!commThread.isAlive())
 			commThread.start();
 	}
-	public void disposeComm() {
+	public void close() {
 		disconnect();
 		readInterface.close();
 	}
