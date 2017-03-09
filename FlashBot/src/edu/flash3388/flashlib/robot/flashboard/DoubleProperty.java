@@ -10,6 +10,7 @@ public class DoubleProperty extends Sendable{
 	private static class DoubleData implements SendableData{
 
 		double lastValue = 0.0, value = 0.0;
+		boolean changed = false;
 		DoubleDataSource src;
 		byte[] bytes = new byte[8];
 		
@@ -25,14 +26,16 @@ public class DoubleProperty extends Sendable{
 		public byte[] get() {
 			lastValue = value;
 			FlashUtil.fillByteArray(lastValue, bytes);
+			changed = false;
 			return bytes;
 		}
 		@Override
 		public boolean hasChanged() {
-			return lastValue != (value = src.get());
+			return lastValue != (value = src.get()) || changed;
 		}
 		@Override
 		public void onConnection() {
+			changed = true;
 		}
 		@Override
 		public void onConnectionLost() {

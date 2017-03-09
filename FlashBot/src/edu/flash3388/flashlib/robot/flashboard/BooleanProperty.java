@@ -8,7 +8,7 @@ public class BooleanProperty extends Sendable{
 
 	private static class BooleanData implements SendableData{
 
-		boolean lastValue = false, value = false;
+		boolean lastValue = false, value = false, changed = false;
 		BooleanDataSource src;
 		byte[] bytes = new byte[1];
 		
@@ -24,14 +24,16 @@ public class BooleanProperty extends Sendable{
 		public byte[] get() {
 			lastValue = value;
 			bytes[0] = (byte) (lastValue? 1 : 0);
+			changed = false;
 			return bytes;
 		}
 		@Override
 		public boolean hasChanged() {
-			return lastValue != (value = src.get());
+			return lastValue != (value = src.get()) || changed;
 		}
 		@Override
 		public void onConnection() {
+			changed = true;
 		}
 		@Override
 		public void onConnectionLost() {
