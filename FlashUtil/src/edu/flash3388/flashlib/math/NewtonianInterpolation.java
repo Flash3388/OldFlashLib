@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.math;
 
-import java.util.Arrays;
+import edu.flash3388.flashlib.util.Algorithms;
 
 public class NewtonianInterpolation extends Interpolation{
 	
@@ -11,17 +11,22 @@ public class NewtonianInterpolation extends Interpolation{
 		super(keyMargin);
 	}
 	
+	@Override
+	public void put(double key, double value){
+		super.put(key, value);
+		valueUpdated = false;
+	}
+	
 	public void updateValues(){
 		if(valuesUpdated()){
 			values = getMap().values().toArray(new Double[0]);
 			keys = getMap().keySet().toArray(new Double[0]);
-			Arrays.sort(keys);
-			Arrays.sort(values);
+			Algorithms.sort(keys, values);
 			valueUpdated = true;
 		}
 	}
 	private boolean valuesUpdated(){
-		return values == null || valueUpdated;
+		return values == null || !valueUpdated;
 	}
 	private double firstOrderDifference(int k){
 		return values[k+1] - values[k];
