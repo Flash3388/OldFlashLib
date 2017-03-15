@@ -154,43 +154,45 @@ public class Communications {
 	}
 	private void resetAll(){
 		Enumeration<Sendable> sendablesEnum = sendables.elements();
-		while(sendablesEnum.hasMoreElements()){
-			Sendable sen = sendablesEnum.nextElement();
-			sen.setRemoteInit(false);
-			SendableData data;
-			if((data = sen.dataForTransmition()) != null)
-				data.onConnection();
-		}
+		while(sendablesEnum.hasMoreElements())
+			resetSendable(sendablesEnum.nextElement());
 	} 
+	private void resetSendable(Sendable sen){
+		sen.setRemoteInit(false);
+		SendableData data;
+		if((data = sen.dataForTransmition()) != null)
+			data.onConnection();
+	}
 	private void onDisconnect(){
 		Enumeration<Sendable> sendablesEnum = sendables.elements();
-		while(sendablesEnum.hasMoreElements()){
-			Sendable sen = sendablesEnum.nextElement();
-			SendableData data;
-			if((data = sen.dataForTransmition()) != null)
-				data.onConnectionLost();
-		}
+		while(sendablesEnum.hasMoreElements())
+			handleDisconnection(sendablesEnum.nextElement());
 	} 
+	private void handleDisconnection(Sendable sen){
+		SendableData data;
+		if((data = sen.dataForTransmition()) != null)
+			data.onConnectionLost();
+	}
 	private void sendAll(){
 		Enumeration<Sendable> sendablesEnum = sendables.elements();
-		while(sendablesEnum.hasMoreElements()){
-			Sendable sen = sendablesEnum.nextElement();
-			
-			if(!sen.remoteInit()){
-				byte[] bytes = sen.getName().getBytes();
-				send(bytes, sen);
-				sen.setRemoteInit(true);
-				continue;
-			}
-			
-			SendableData data = sen.dataForTransmition();
-			byte[] dataB;
-			
-			if(data == null || !data.hasChanged() || (dataB = data.get()) == null) continue;
-			send(dataB, sen);
-		}
+		while(sendablesEnum.hasMoreElements())
+			sendFromSendable(sendablesEnum.nextElement());
 	}
-	
+	private void sendFromSendable(Sendable sen){
+		if(!sen.remoteInit()){
+			byte[] bytes = sen.getName().getBytes();
+			send(bytes, sen);
+			sen.setRemoteInit(true);
+			return;
+		}
+		
+		SendableData data = sen.dataForTransmition();
+		byte[] dataB;
+		
+		if(data == null || !data.hasChanged() || (dataB = data.get()) == null) 
+			return;
+		send(dataB, sen);
+	}
 	private void updateClock(){
 		currentMillis = FlashUtil.millis();
 	}
@@ -231,11 +233,16 @@ public class Communications {
 		if(getByID(sendable.getID()) == null){
 			sendables.add(sendable);
 			sendable.setAttached(true);
+			if(isConnected())
+				resetSendable(sendable);
 		}
 	}
 	public boolean detach(Sendable sendable){
-		if(sendables.remove(sendable))
+		if(sendables.remove(sendable)){
 			sendable.setAttached(false);
+			if(isConnected())
+				handleDisconnection(sendable);
+		}
 		return !sendable.attached();
 	}
 	public boolean detach(int index){
@@ -243,6 +250,8 @@ public class Communications {
 		if(sen != null) {
 			sendables.remove(index);
 			sen.setAttached(false);
+			if(isConnected())
+				handleDisconnection(sen);
 		}
 		return sen != null && !sen.attached();
 	}
@@ -251,8 +260,15 @@ public class Communications {
 		if(sen != null) {
 			sendables.remove(sen);
 			sen.setAttached(false);
+			if(isConnected())
+				handleDisconnection(sen);
 		}
 		return sen != null && !sen.attached();
+	}
+	public void detachAll(){
+		Enumeration<Sendable> sendablesEnum = sendables.elements();
+		while (sendablesEnum.hasMoreElements())
+			detach(sendablesEnum.nextElement());
 	}
 	public Sendable getByID(int id){
 		Enumeration<Sendable> sendablesEnum = sendables.elements();
@@ -318,6 +334,7 @@ public class Communications {
 	public void close() {
 		disconnect();
 		readInterface.close();
+		detachAll();
 	}
 	public void sendDataForSendable(Sendable sendable, byte[] data){
 		if(getByID(sendable.getID()) == null)
