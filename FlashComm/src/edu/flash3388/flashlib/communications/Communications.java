@@ -23,11 +23,11 @@ public class Communications {
 		public void run() {
 			try{
 				while(!stop){
-					Log.logTime(comm.logName+": Searching for remote connection");
+					Log.log("Searching for remote connection", comm.logName);
 					while(!comm.connect() && !stop);
 					if(stop) break;
 					
-					Log.logTime(comm.logName+": Connected");
+					Log.log("Connected", comm.logName);
 					comm.resetAll();
 					comm.updateClock();
 					comm.lastRead = comm.readClock();
@@ -42,12 +42,13 @@ public class Communications {
 						
 						if(comm.connectionTimedout()){
 							timeouts++;
-							Log.logTime(comm.logName+": TIMEOUT " + timeouts);
+							long time = comm.currentMillis - comm.lastRead;
+							Log.log("TIMEOUT " + timeouts + " :: "+time, comm.logName);
 							comm.lastRead = comm.readClock();
 							timeLastTimeout = comm.readClock();
 						}
 						if(timeouts >= maxTimeouts){
-							Log.logTime(comm.logName+": Connection lost");
+							Log.log("Connection lost", comm.logName);
 							comm.connected = false;
 							break;
 						}
@@ -55,13 +56,13 @@ public class Communications {
 								comm.readClock() - timeLastTimeout > (comm.connectionTimeout*3)){
 							timeouts = 0;
 							timeLastTimeout = -1;
-							Log.logTime(comm.logName+": Timeout Reset");
+							Log.log("Timeout Reset", comm.logName);
 						}
 						comm.writeHandshake();
 						FlashUtil.delay(1);
 					}
 					comm.onDisconnect();
-					Log.logTime(comm.logName+": Disconnected");
+					Log.log("Disconnected", comm.logName);
 				}
 			}catch(IOException e){
 				Log.reportError(e.getMessage());
@@ -76,7 +77,11 @@ public class Communications {
 	public static final int CONNECTION_TIMEOUT = 1000;
 	public static final int READ_TIMEOUT = 20;
 	public static final int MAX_REC_LENGTH = 100;
-	public static final byte[] HANDSHAKE = {0x01, 0x00, 0x01};
+	public static final byte[] HANDSHAKE = {0x01, 0xe, 0x07};
+	
+	public static final byte[] HANDSHAKE_CONNECT_SERVER = {0xb, 0x02, 0xa};
+	public static final byte[] HANDSHAKE_CONNECT_CLIENT = {0xc, 0x10, 0x06};
+	
 	private static int instances = 0;
 	
 	private Vector<Sendable> sendables;
@@ -104,7 +109,7 @@ public class Communications {
 		setConnectionTimeout(CONNECTION_TIMEOUT);
 		
 		initializeConcurrency();
-		Log.logTime(logName+": Initialized");
+		Log.log("Initialized", logName);
 		
 		sendables = new Vector<Sendable>();
 		setBufferSize(MAX_REC_LENGTH);
@@ -131,7 +136,7 @@ public class Communications {
 			Packet packet = receivePacket();
 			if(packet == null || packet.length < 1)
 				return;
-			lastRead = FlashUtil.millis();
+			lastRead = currentMillis;
 			if(isHandshake(packet.data, packet.length))
 				continue;
 			if(packet.length < 5)
@@ -345,30 +350,46 @@ public class Communications {
 	private static boolean handshakeServer(ReadInterface readInterface, Packet packet){
 		readInterface.setReadTimeout(READ_TIMEOUT * 4);
 		readInterface.read(packet);
-		if(!isHandshake(packet.data, packet.length))
+		if(!isHandshakeClient(packet.data, packet.length))
 			return false;
 		
-		readInterface.write(HANDSHAKE);
+		readInterface.write(HANDSHAKE_CONNECT_SERVER);
 		readInterface.read(packet);
-		if(!isHandshake(packet.data, packet.length))
+		if(!isHandshakeClient(packet.data, packet.length))
 			return false;
 		return true;
 	}
 	private static boolean handshakeClient(ReadInterface readInterface, Packet packet){
 		readInterface.setReadTimeout(READ_TIMEOUT);
-		readInterface.write(HANDSHAKE);
+		readInterface.write(HANDSHAKE_CONNECT_CLIENT);
 		
 		readInterface.read(packet);
-		if(!isHandshake(packet.data, packet.length))
+		if(!isHandshakeServer(packet.data, packet.length))
 			return false;
 		
-		readInterface.write(HANDSHAKE);
+		readInterface.write(HANDSHAKE_CONNECT_CLIENT);
 		return true;
 	}
 	public static boolean isHandshake(byte[] bytes, int length){
 		if(length != HANDSHAKE.length) return false;
 		for(int i = 0; i < length; i++){
 			if(bytes[i] != HANDSHAKE[i])
+				return false;
+		}
+		return true;
+	}
+	public static boolean isHandshakeServer(byte[] bytes, int length){
+		if(length != HANDSHAKE_CONNECT_SERVER.length) return false;
+		for(int i = 0; i < length; i++){
+			if(bytes[i] != HANDSHAKE_CONNECT_SERVER[i])
+				return false;
+		}
+		return true;
+	}
+	public static boolean isHandshakeClient(byte[] bytes, int length){
+		if(length != HANDSHAKE_CONNECT_CLIENT.length) return false;
+		for(int i = 0; i < length; i++){
+			if(bytes[i] != HANDSHAKE_CONNECT_CLIENT[i])
 				return false;
 		}
 		return true;

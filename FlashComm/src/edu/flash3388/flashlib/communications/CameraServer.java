@@ -28,6 +28,9 @@ public class CameraServer {
 				server.sendAddress = packet.getAddress();
 				server.sendPort = packet.getPort();
 				
+				Log.log("Client Connected: "+server.sendAddress.getHostAddress()+
+						":"+server.sendPort, server.logName);
+				
 				byte[] checkBytes = HANDSHAKE;
 				long cmillis = FlashUtil.millis();
 				long period = (server.camera == null || server.camera.getFPS() <= 5? DEFAULT_PERIOD : 
@@ -54,11 +57,17 @@ public class CameraServer {
 		            if(cmillis - lastCheck > CHECK_PERIOD){
 		            	server.socket.send(new DatagramPacket(checkBytes, checkBytes.length, server.sendAddress, server.sendPort));
 				       
+		            	int port = server.port;
+		            	String address = server.sendAddress.getHostAddress();
 				        packet = new DatagramPacket(bytes, bytes.length);
 						server.socket.receive(packet);
 						server.sendAddress = packet.getAddress();
 						server.sendPort = packet.getPort();
 				        
+						if(port != server.sendPort || !address.equals(address))
+							Log.log("Client Connected: "+server.sendAddress.getHostAddress()+":"+
+									server.sendPort, server.logName);
+						
 		            	lastCheck = cmillis;
 		            }
 		            cmillis = FlashUtil.millis();
@@ -79,7 +88,7 @@ public class CameraServer {
 	private InetAddress sendAddress;
 	private int sendPort;
 	private int port;
-	private String name;
+	private String name, logName;
 	private long bytesSent = 0;
 	private long lastCalVal = 0;
 	
@@ -89,6 +98,7 @@ public class CameraServer {
 	public CameraServer(String name, int localPort, Camera camera){
 		port = localPort;
 		this.name = name;
+		logName = name+"-CameraServer";
 		try {
 			socket = new DatagramSocket(new InetSocketAddress(localPort));
 		} catch (SocketException e) {
@@ -124,7 +134,7 @@ public class CameraServer {
 	public double getBandwidthUsage(){
 		long cMillis = FlashUtil.millis();
 		double secs = (cMillis - lastCalVal) / 1000.0;
-		double mbytes = bytesSent / 1024.0;
+		double mbytes = bytesSent * 8 / 1e6;
 		bytesSent = 0;
 		lastCalVal = cMillis;
 		return mbytes / secs;

@@ -21,6 +21,11 @@ public class UDPReadInterface implements ReadInterface{
 	private boolean server = false;
 	private long bytesRead = 0, readStart = -1;
 	
+	long counter = 0;
+	long timestamp = -1;
+	static final long INTERVAL = 1000;
+	long limit = -1;
+	
 	public UDPReadInterface(CommInfo info) throws SocketException, UnknownHostException{
 		outInet = InetAddress.getByName(info.hostname);
 		socket = new DatagramSocket(info.localPort);
@@ -56,8 +61,17 @@ public class UDPReadInterface implements ReadInterface{
 	@Override
 	public boolean read(Packet packet) {
 		if(!isOpened()) return false;
-		if(readStart < 0)
+		if(readStart < 0){
 			readStart = FlashUtil.millis();
+			timestamp = readStart;
+		}
+		if(limit != -1 && counter > limit){
+			long now = FlashUtil.millis();
+			if(timestamp + INTERVAL >= now)
+				FlashUtil.delay(timestamp + INTERVAL - now);
+			timestamp = now;
+	        counter = 0;
+		}
 		try {
 			DatagramPacket recp = new DatagramPacket(data, maxBufferSize);
 			socket.receive(recp);
@@ -72,6 +86,7 @@ public class UDPReadInterface implements ReadInterface{
 			packet.data = recp.getData();
 			packet.length = recp.getLength();
 			bytesRead += packet.length;
+			counter += packet.length;
 			return true;
 		} catch (IOException e) {
 			packet.length = 0;
@@ -102,11 +117,21 @@ public class UDPReadInterface implements ReadInterface{
 	}
 	public void write(byte[] data, InetAddress outInet, int portOut){
 		if(!isOpened()) return;
-		if(readStart < 0)
+		if(readStart < 0){
 			readStart = FlashUtil.millis();
+			timestamp = readStart;
+		}
+		if(limit != -1 && counter > limit){
+			long now = FlashUtil.millis();
+			if(timestamp + INTERVAL >= now)
+				FlashUtil.delay(timestamp + INTERVAL - now);
+			timestamp = now;
+	        counter = 0;
+		}
 		try {
 			socket.send(new DatagramPacket(data, data.length, outInet, portOut));
 			bytesRead += data.length;
+			counter += data.length;
 		} catch (IOException e) {}
 	}
 
@@ -139,9 +164,21 @@ public class UDPReadInterface implements ReadInterface{
 	public double getBandwithUsage(){
 		if(readStart < 0) return 0;
 		double secs = (FlashUtil.millis() - readStart) / 1000;
-		double mbytes = bytesRead / 1024.0;
+		double mbytes = bytesRead * 8 / 1e6;
 		readStart = -1;
 		bytesRead = 0;
 		return (mbytes / secs);
+	}
+	public long getBytesPassed(){
+		return bytesRead;
+	}
+	public long getMillisSinceReset(){
+		return FlashUtil.millis() - readStart;
+	}
+	public void setBandwidthLimit(double mbps){
+		limit = (long) (mbps * 1e6 / 8);
+	}
+	public void disableBandwidthLimit(){
+		limit = -1;
 	}
 }
