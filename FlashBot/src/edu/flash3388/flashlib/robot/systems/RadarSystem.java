@@ -149,7 +149,7 @@ public class RadarSystem{
 		for (Enumeration<RadarNode> nodeEnum = nodes.elements(); nodeEnum.hasMoreElements();){
 			RadarNode radarNode = nodeEnum.nextElement();
 			radarNode.ping();
-			FlashUtil.delay(100);
+			FlashUtil.delay(50);
 			radarNode.updateRange();
 		}
 	}
