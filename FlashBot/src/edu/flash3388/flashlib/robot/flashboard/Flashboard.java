@@ -79,8 +79,8 @@ public class Flashboard {
 			try {
 				communications = new Communications("Flashboard", new UDPReadInterface(info.localPort), true);
 				vision = new RemoteVision();
-				camViewer = new CameraView(null, new Camera[]{});
-				camServer = new CameraServer(info.camPort, camViewer);
+				camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
+				camServer = new CameraServer("Flashboard", info.camPort, camViewer);
 				communications.attach(vision);
 				
 				instance = true;
