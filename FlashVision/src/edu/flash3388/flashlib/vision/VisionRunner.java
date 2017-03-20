@@ -1,7 +1,8 @@
 package edu.flash3388.flashlib.vision;
 
+import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.communications.SendableData;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 public abstract class VisionRunner extends Sendable implements Vision{
 
@@ -112,7 +113,7 @@ public abstract class VisionRunner extends Sendable implements Vision{
 	@Override
 	public void setParameters(ProcessingParam param) {
 		parameters = param;
-		Log.log("Parameters set");
+		FlashUtil.getLog().log("Parameters set");
 	}
 	@Override
 	public ProcessingParam getParameters() {
@@ -147,10 +148,10 @@ public abstract class VisionRunner extends Sendable implements Vision{
 		if(data.length == 2){
 			boolean t = data[0] == 1, r = data[1] == 1;
 			if(!t){
-				Log.log("Remote Parameters: "+r);
+				FlashUtil.getLog().log("Remote Parameters: "+r);
 				remoteParam = r;
 			}else{
-				Log.log("Starting: "+r);
+				FlashUtil.getLog().log("Starting: "+r);
 				if(r) start();
 				else stop();
 			}
