@@ -7,7 +7,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.FlashUtil;
 
 public class CvMultiCamera extends CameraView{
 
@@ -49,12 +49,12 @@ public class CvMultiCamera extends CameraView{
 	public Camera currentCamera() {
 		int index = getSelector() != null? getSelector().getCameraIndex() : 0;
 		if(index < 0 || index >= cams.length){
-			Log.reportError("Camera selector index is out of bounds "+index);
+			FlashUtil.getLog().reportError("Camera selector index is out of bounds "+index);
 			return null;
 		}
 		if(camIndex != index){
 			camIndex = cams[index];
-			Log.log("New index "+index+":"+camIndex);
+			FlashUtil.getLog().log("New index "+index+":"+camIndex);
 			if(camIndex >= 0)
 				open(camIndex);
 		}
@@ -100,7 +100,7 @@ public class CvMultiCamera extends CameraView{
 		if(!capture.isOpened()) return null;
 		capture.read(image); 
 		if(image.empty()) {
-			Log.log("CvMultiCamera image empty "+camIndex);
+			FlashUtil.getLog().log("CvMultiCamera image empty "+camIndex);
 			return null;
 		}
 		return image;

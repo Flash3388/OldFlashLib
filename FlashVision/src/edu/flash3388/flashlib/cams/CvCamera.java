@@ -7,7 +7,8 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.FlashUtil;
+
 
 public class CvCamera implements Camera{
 
@@ -54,7 +55,7 @@ public class CvCamera implements Camera{
 		if(!capture.isOpened()) return null;
 		capture.read(image);
 		if(image.empty()) {
-			Log.log("CvCamera image empty "+camIndex);
+			FlashUtil.getLog().log("CvCamera image empty "+camIndex);
 			return null;
 		}
 		return image;

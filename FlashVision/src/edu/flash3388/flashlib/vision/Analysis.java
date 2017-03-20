@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.vision;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 public class Analysis {
 	
@@ -13,7 +12,7 @@ public class Analysis {
 	
 	public void print(){
 		String all = "H_dis: "+horizontalDistance+" V_dis: "+verticalDistance+" Dis: "+targetDistance+" Angle:"+offsetAngle;
-		Log.log(all);
+		FlashUtil.getLog().log(all);
 	}
 	public byte[] transmit(){
 		byte[] bytes = new byte[8 * 4], x = FlashUtil.toByteArray((int)centerPointX), 
