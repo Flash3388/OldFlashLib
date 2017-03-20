@@ -14,17 +14,20 @@ import static edu.flash3388.flashlib.robot.rio.FlashRioUtil.*;
 public abstract class FlashRio extends SampleRobot {
 	
 	private Log log;
+	private Log powerLog;
 	
 	@Override
 	protected void robotInit(){
 		initFlashLib();
 		initRobot();
 		log = FlashUtil.getLog();
+		powerLog = new Log("powerlog", true);
 	}
 	@Override
 	public void robotMain() {
 		log.logTime("STARTING");
 		LiveWindow.setEnabled(false);
+		powerLog.log("Starting >> "+m_ds.getBatteryVoltage());
 		while(true){
 			if(isDisabled()){
 				log.saveLog();
@@ -35,6 +38,7 @@ public abstract class FlashRio extends SampleRobot {
 				
 				while(isDisabled()){
 					disabledPeriodic();
+					logPower();
 					delay(5);
 				}
 				m_ds.InDisabled(false);
@@ -49,6 +53,7 @@ public abstract class FlashRio extends SampleRobot {
 				while(isEnabled() && isAutonomous()){
 					runScheduler();
 					autonomousPeriodic();
+					logPower();
 					delay(5);
 				}
 				m_ds.InAutonomous(false);
@@ -63,6 +68,7 @@ public abstract class FlashRio extends SampleRobot {
 				while(isEnabled() && isTest()){
 					runScheduler();
 					testPeriodic();
+					logPower();
 					delay(5);
 				}
 				m_ds.InTest(false);
@@ -77,12 +83,21 @@ public abstract class FlashRio extends SampleRobot {
 				while(isEnabled() && isOperatorControl()){
 					runScheduler();
 					teleopPeriodic();
+					logPower();
 					delay(3);
 				}
 				m_ds.InOperatorControl(false);
 				log.logTime("TELEOP - DONE");
 			}
 		}
+	}
+	
+	private void logPower(){
+		double volts = m_ds.getBatteryVoltage();
+		if(volts < 10)
+			powerLog.logTime("Power bellow 10: "+volts+"v");
+		if(m_ds.isBrownedOut())
+			powerLog.logTime("Browned out!!");
 	}
 	
 	protected abstract void initRobot();
