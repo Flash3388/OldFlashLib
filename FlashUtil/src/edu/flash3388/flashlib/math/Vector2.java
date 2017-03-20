@@ -25,10 +25,10 @@ public class Vector2 {
 		this.y /= l;
 	}
 	
-	public double x(){
+	public double getX(){
 		return x;
 	}
-	public double y(){
+	public double getY(){
 		return y;
 	}
 	public void setX(double x){

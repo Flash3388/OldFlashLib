@@ -7,6 +7,7 @@ public class FlashUtil {
 	
 	private FlashUtil(){}
 	private static long startTime = 0;
+	private static Log mainLog;
 	
 	//--------------------------------------------------------------------
 	//--------------------------Time--------------------------------------
@@ -32,6 +33,10 @@ public class FlashUtil {
 	}
 	public static void setStart(){
 		setStartTime(System.currentTimeMillis());
+		mainLog = new Log("flashlib");
+	}
+	public static Log getLog(){
+		return mainLog;
 	}
 	
 	//--------------------------------------------------------------------
@@ -131,10 +136,10 @@ public class FlashUtil {
 	public static byte[] fillByteArray(int value, int start, byte[] bytes){
 		if(bytes.length < 4) throw new IllegalArgumentException("Bytes array must be 4 bytes long");
 		
-		bytes[start + 3] = (byte) (value & 0xFF);   
-		bytes[start + 2] = (byte) ((value >> 8) & 0xFF);   
-		bytes[start + 1] = (byte) ((value >> 16) & 0xFF);   
-		bytes[start] = (byte) ((value >> 24) & 0xFF);
+		bytes[start + 3] = (byte) (value & 0xff);   
+		bytes[start + 2] = (byte) ((value >> 8) & 0xff);   
+		bytes[start + 1] = (byte) ((value >> 16) & 0xff);   
+		bytes[start] = (byte) ((value >> 24) & 0xff);
 		return bytes;
 	}
 	
@@ -144,10 +149,10 @@ public class FlashUtil {
 	    return bytes;
 	}
 	public static int toInt(byte[] b){
-	    return   b[3] & 0xFF |
-	            (b[2] & 0xFF) << 8 |
-	            (b[1] & 0xFF) << 16 |
-	            (b[0] & 0xFF) << 24;
+	    return   b[3] & 0xff |
+	            (b[2] & 0xff) << 8 |
+	            (b[1] & 0xff) << 16 |
+	            (b[0] & 0xff) << 24;
 	}
 	public static int toInt(byte[] b, int s){
 	    return toInt(Arrays.copyOfRange(b, s, s + 4));
@@ -173,21 +178,39 @@ public class FlashUtil {
 	}
 	
 	public static int toInt(String s){
+		return toInt(s, 0);
+	}
+	public static int toInt(String s, int defaultVal){
 		try{
 			return Integer.parseInt(s);
 		}catch(NumberFormatException e){}
-		return 0;
+		return defaultVal;
+	}
+	public static long toLong(String s){
+		return toLong(s, 0);
+	}
+	public static long toLong(String s, long defaultVal){
+		try{
+			return Long.parseLong(s);
+		}catch(NumberFormatException e){}
+		return defaultVal;
 	}
 	public static double toDouble(String s){
+		return toDouble(s, 0);
+	}
+	public static double toDouble(String s, double defaultVal){
 		try{
 			return Double.parseDouble(s);
 		}catch(NumberFormatException e){}
-		return 0;
+		return defaultVal;
 	}
 	public static float toFloat(String s){
+		return toFloat(s, 0);
+	}
+	public static float toFloat(String s, float defaultVal){
 		try{
 			return Float.parseFloat(s);
 		}catch(NumberFormatException e){}
-		return 0;
+		return defaultVal;
 	}
 }

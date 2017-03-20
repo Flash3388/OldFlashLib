@@ -99,16 +99,17 @@ public class Queue<T> implements java.util.Queue<T>{
 		return Arrays.copyOfRange(elements, 0, size());
 	}
 	
-	@SuppressWarnings("hiding")
 	@Override
-	public <T> T[] toArray(T[] a) {
-		T[] ret = null;
-		if(a != null && a.length >= size()){
-			ret = a;
-			System.arraycopy(elements, 0, ret, 0, size());
-		}else
-			ret = (T[]) Arrays.copyOf(elements, size());
-		return ret;
+	public <E> E[] toArray(E[] a) {
+		if (a.length < nextIndex)
+            return (E[]) Arrays.copyOf(elements, nextIndex, a.getClass());
+
+        System.arraycopy(elements, 0, a, 0, nextIndex);
+
+        if (a.length > nextIndex)
+            a[nextIndex] = null;
+
+        return a;
 	}
 	@Override
 	public boolean remove(Object o) {

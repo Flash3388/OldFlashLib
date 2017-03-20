@@ -38,13 +38,13 @@ public class Vector3 {
 		return new Vector3(x / l, y / l, z / l);
 	}
 	
-	public double x(){
+	public double getX(){
 		return x;
 	}
-	public double y(){
+	public double getY(){
 		return y;
 	}
-	public double z(){
+	public double getZ(){
 		return z;
 	}
 	public void setX(double x){
