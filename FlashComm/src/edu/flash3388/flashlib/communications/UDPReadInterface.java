@@ -13,18 +13,13 @@ import edu.flash3388.flashlib.util.FlashUtil;
 public class UDPReadInterface implements ReadInterface{
 
 	private DatagramSocket socket;
-	private int portOut;
+	private int portOut = -1;
 	private InetAddress outInet;
 	private boolean closed = false;
 	private int maxBufferSize = 50;
 	private byte[] data = new byte[maxBufferSize];
 	private boolean server = false;
 	private long bytesRead = 0, readStart = -1;
-	
-	long counter = 0;
-	long timestamp = -1;
-	static final long INTERVAL = 1000;
-	long limit = -1;
 	
 	public UDPReadInterface(CommInfo info) throws SocketException, UnknownHostException{
 		outInet = InetAddress.getByName(info.hostname);
@@ -61,22 +56,13 @@ public class UDPReadInterface implements ReadInterface{
 	@Override
 	public boolean read(Packet packet) {
 		if(!isOpened()) return false;
-		if(readStart < 0){
+		if(readStart < 0)
 			readStart = FlashUtil.millis();
-			timestamp = readStart;
-		}
-		if(limit != -1 && counter > limit){
-			long now = FlashUtil.millis();
-			if(timestamp + INTERVAL >= now)
-				FlashUtil.delay(timestamp + INTERVAL - now);
-			timestamp = now;
-	        counter = 0;
-		}
 		try {
 			DatagramPacket recp = new DatagramPacket(data, maxBufferSize);
 			socket.receive(recp);
 			
-			if(server){
+			if(server && portOut < 0 && outInet == null){
 				outInet = recp.getAddress();
 				portOut = recp.getPort();
 			}
@@ -86,7 +72,6 @@ public class UDPReadInterface implements ReadInterface{
 			packet.data = recp.getData();
 			packet.length = recp.getLength();
 			bytesRead += packet.length;
-			counter += packet.length;
 			return true;
 		} catch (IOException e) {
 			packet.length = 0;
@@ -117,21 +102,11 @@ public class UDPReadInterface implements ReadInterface{
 	}
 	public void write(byte[] data, InetAddress outInet, int portOut){
 		if(!isOpened()) return;
-		if(readStart < 0){
+		if(readStart < 0)
 			readStart = FlashUtil.millis();
-			timestamp = readStart;
-		}
-		if(limit != -1 && counter > limit){
-			long now = FlashUtil.millis();
-			if(timestamp + INTERVAL >= now)
-				FlashUtil.delay(timestamp + INTERVAL - now);
-			timestamp = now;
-	        counter = 0;
-		}
 		try {
 			socket.send(new DatagramPacket(data, data.length, outInet, portOut));
 			bytesRead += data.length;
-			counter += data.length;
 		} catch (IOException e) {}
 	}
 
@@ -174,11 +149,5 @@ public class UDPReadInterface implements ReadInterface{
 	}
 	public long getMillisSinceReset(){
 		return FlashUtil.millis() - readStart;
-	}
-	public void setBandwidthLimit(double mbps){
-		limit = (long) (mbps * 1e6 / 8);
-	}
-	public void disableBandwidthLimit(){
-		limit = -1;
 	}
 }

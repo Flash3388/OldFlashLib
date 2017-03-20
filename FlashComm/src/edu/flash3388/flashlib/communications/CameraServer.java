@@ -33,7 +33,7 @@ public class CameraServer {
 				byte[] checkBytes = HANDSHAKE;
 				long cmillis = FlashUtil.millis();
 				long period = (server.camera == null || server.camera.getFPS() <= 5? DEFAULT_PERIOD : 
-					server.camera.getFPS()), 
+					1000 / server.camera.getFPS()), 
 						lastCheck = cmillis;
 				server.lastCalVal = cmillis;
 				while(!server.stop){
@@ -56,15 +56,16 @@ public class CameraServer {
 		            if(cmillis - lastCheck > CHECK_PERIOD){
 		            	server.socket.send(new DatagramPacket(checkBytes, checkBytes.length, server.sendAddress, server.sendPort));
 				       
-		            	int port = server.port;
+		            	int port = server.sendPort;
 		            	String address = server.sendAddress.getHostAddress();
 				        packet = new DatagramPacket(bytes, bytes.length);
 						server.socket.receive(packet);
 						server.sendAddress = packet.getAddress();
 						server.sendPort = packet.getPort();
-				        
-						if(port != server.sendPort || !address.equals(address))
-							FlashUtil.getLog().log("Client Connected: "+server.sendAddress.getHostAddress()+":"+
+						
+						String naddress = server.sendAddress.getHostAddress();
+						if(port != server.sendPort || !address.equals(naddress))
+							FlashUtil.getLog().log("Client Connected: "+naddress+":"+
 									server.sendPort, server.logName);
 						
 		            	lastCheck = cmillis;

@@ -28,16 +28,15 @@ public class Communications {
 					
 					FlashUtil.getLog().log("Connected", comm.logName);
 					comm.resetAll();
-					comm.updateClock();
+					
 					comm.lastRead = comm.readClock();
+					timeLastTimeout = -1;
 					int timeouts = 0;
 					while(comm.isConnected()){
 						comm.writeHandshake();
 						
 						comm.sendAll();
 						comm.read();
-						
-						comm.updateClock();
 						
 						if(comm.connectionTimedout()){
 							timeouts++;
@@ -51,7 +50,7 @@ public class Communications {
 							comm.connected = false;
 							break;
 						}
-						if(timeLastTimeout != -1 && 
+						if(timeouts > 0 && timeLastTimeout != -1 && 
 								comm.readClock() - timeLastTimeout > (comm.connectionTimeout*3)){
 							timeouts = 0;
 							timeLastTimeout = -1;
@@ -138,6 +137,14 @@ public class Communications {
 			lastRead = currentMillis;
 			if(isHandshake(packet.data, packet.length))
 				continue;
+			if(server && isHandshakeClient(packet.data, packet.length)){
+				write(HANDSHAKE_CONNECT_SERVER);
+				continue;
+			}
+			if(!server && isHandshakeServer(packet.data, packet.length)){
+				write(HANDSHAKE_CONNECT_CLIENT);
+				continue;
+			}
 			if(packet.length < 5)
 				continue;
 			
@@ -153,7 +160,6 @@ public class Communications {
 					sen.setAttached(true);
 				}
 			}
-			updateClock();
 		}
 	}
 	private void resetAll(){
@@ -201,13 +207,11 @@ public class Communications {
 		currentMillis = FlashUtil.millis();
 	}
 	private boolean readTimedout(){
-		if(currentMillis == -1)
-			currentMillis = FlashUtil.millis();
+		updateClock();
 		return readStart != -1 && currentMillis - readStart > readTimeout;
 	}
 	private boolean connectionTimedout(){
-		if(currentMillis == -1)
-			currentMillis = FlashUtil.millis();
+		updateClock();
 		return lastRead != -1 && currentMillis - lastRead > connectionTimeout;
 	}
 	private long readClock(){
@@ -291,6 +295,7 @@ public class Communications {
 	}
 	public boolean connect() throws IOException{
 		if(connected) return true;
+		updateClock();
 		connected = server? handshakeServer(readInterface, packet) : handshakeClient(readInterface, packet);
 		return connected;
 	}
