@@ -27,7 +27,7 @@ public abstract class FlashRio extends SampleRobot {
 	public void robotMain() {
 		log.logTime("STARTING");
 		LiveWindow.setEnabled(false);
-		powerLog.log("Starting >> "+m_ds.getBatteryVoltage());
+		powerLog.log("Starting >> "+m_ds.getBatteryVoltage(), "Power");
 		while(true){
 			if(isDisabled()){
 				log.saveLog();
