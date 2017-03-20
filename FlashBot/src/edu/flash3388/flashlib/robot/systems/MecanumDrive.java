@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.systems;
 
 import edu.flash3388.flashlib.math.Mathf;
-import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.robot.Direction;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.System;
@@ -9,6 +8,7 @@ import edu.flash3388.flashlib.robot.VoltageScalable;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.robot.hid.Stick;
+import edu.flash3388.flashlib.util.FlashUtil;
 
 public class MecanumDrive extends System implements HolonomicDriveSystem, VoltageScalable {
 
@@ -39,7 +39,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 			changed = CHANGED_NOTHING;
 			changesCount = 0;
 			movmentAngle = Mathf.limitAngle(gyro.getAngle());
-			Log.log("\nStabilizer: New Feed - (" + magnitude + ", " + direction + ") - " + movmentAngle);
+			FlashUtil.getLog().log("\nStabilizer: New Feed - (" + magnitude + ", " + direction + ") - " + movmentAngle);
 		}
 
 		private boolean isDirectionSideways(double direction) {
@@ -56,17 +56,17 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 			if (magnitude != this.magnitude || direction != this.direction)
 				feedNew(magnitude, direction);
 			double currentAngle = Mathf.limitAngle(gyro.getAngle());
-			// Log.log("Stabilizer: CurrentAngle: "+currentAngle);
+			// FlashUtil.getLog().log("Stabilizer: CurrentAngle: "+currentAngle);
 			if (currentAngle > movmentAngle - offsetMargin && currentAngle < movmentAngle + offsetMargin) {
-				// Log.log("Stabilizer: Offset minimal");
+				// FlashUtil.getLog().log("Stabilizer: Offset minimal");
 				return;
 			}
-			// Log.log("Stabilizer: Offset Bad");
+			// FlashUtil.getLog().log("Stabilizer: Offset Bad");
 			double strengthChange = DEFAULT_STRENGTH_CHANGE;
 			int rotationDir = getRotationDirection(currentAngle);
-			// Log.log("Stabilizer: Rotation Dir: "+rotationDir);
+			// FlashUtil.getLog().log("Stabilizer: Rotation Dir: "+rotationDir);
 			if (isDirectionSideways(direction)) {
-				Log.log("Stabilizer: Sidways: TRUE");
+				FlashUtil.getLog().log("Stabilizer: Sidways: TRUE");
 				if (rotationDir < 0) {
 					weakerWheels[0] = WHEEL_FRONT_LEFT;
 					weakerWheels[1] = WHEEL_FRONT_RIGHT;
@@ -79,7 +79,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 					weakerWheels[1] = WHEEL_REAR_RIGHT;
 				}
 			} else {
-				Log.log("Stabilizer: Sideways: FALSE");
+				FlashUtil.getLog().log("Stabilizer: Sideways: FALSE");
 				if (rotationDir < 0) {
 					weakerWheels[0] = WHEEL_FRONT_LEFT;
 					weakerWheels[1] = WHEEL_REAR_LEFT;
@@ -100,7 +100,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 			}
 
 			if (changed != CHANGED_WEAKER) {
-				Log.log("Stabilizer: WEAKER CHANGE");
+				FlashUtil.getLog().log("Stabilizer: WEAKER CHANGE");
 				if (wheelSpeeds[weakerWheels[0]] != 0)
 					wheelSpeeds[weakerWheels[0]] += strengthChange;
 				if (wheelSpeeds[weakerWheels[1]] != 0)
@@ -111,7 +111,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 					changesCount = 0;
 				}
 			} else if (changed != CHANGED_STRONGER) {
-				Log.log("Stabilizer: STRONGER CHANGE");
+				FlashUtil.getLog().log("Stabilizer: STRONGER CHANGE");
 				if (wheelSpeeds[strongerWheels[0]] != 0)
 					wheelSpeeds[strongerWheels[0]] -= strengthChange;
 				if (wheelSpeeds[strongerWheels[1]] != 0)
@@ -128,7 +128,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 				return 0;
 			if (magnitude != this.magnitude || direction != this.direction){
 				feedNew(magnitude, direction);
-				Log.log("Feed new");
+				FlashUtil.getLog().log("Feed new");
 			}
 			double currentAngle = Mathf.limitAngle(gyro.getAngle());
 			if (currentAngle > movmentAngle - offsetMargin && currentAngle < movmentAngle + offsetMargin) {
@@ -136,7 +136,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 			}
 			int rotationDir = -getRotationDirection(currentAngle);
 			double speed = 2 * magnitude * (Math.abs(currentAngle - movmentAngle) / 100.0);
-			Log.log("Offset>>> speed: "+speed+" dir: "+rotationDir);
+			FlashUtil.getLog().log("Offset>>> speed: "+speed+" dir: "+rotationDir);
 			return speed * rotationDir;
 		}
 		public double stabilizeVector(double magnitude, double direction){
@@ -144,7 +144,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 				return 0;
 			if (magnitude != this.magnitude || direction != this.direction){
 				feedNew(magnitude, direction);
-				Log.log("Feed new");
+				FlashUtil.getLog().log("Feed new");
 			}
 			double currentAngle = Mathf.limitAngle(gyro.getAngle());
 			if (currentAngle > movmentAngle - offsetMargin && currentAngle < movmentAngle + offsetMargin) {
@@ -152,7 +152,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 			}
 			int rotationDir = -getRotationDirection(currentAngle);
 			double offset = Mathf.limitAngle(currentAngle - movmentAngle);
-			Log.log("Offset! >>Mag: "+offset+" Dir: "+rotationDir);
+			FlashUtil.getLog().log("Offset! >>Mag: "+offset+" Dir: "+rotationDir);
 			return offset * rotationDir;
 		}
 

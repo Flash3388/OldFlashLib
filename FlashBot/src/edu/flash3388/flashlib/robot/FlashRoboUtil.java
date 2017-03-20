@@ -7,7 +7,6 @@ import edu.flash3388.flashlib.robot.flashboard.SendableLog;
 import edu.flash3388.flashlib.robot.hid.Joystick;
 import edu.flash3388.flashlib.robot.hid.XboxController;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 public class FlashRoboUtil {
 	private FlashRoboUtil(){}
@@ -62,8 +61,7 @@ public class FlashRoboUtil {
 		RobotFactory.setImplementationType(implType);
 		FlashUtil.setStart();
 		
-		Log.init();
-		Log.logTime("INITIALIZING...");
+		FlashUtil.getLog().logTime("INITIALIZING...");
 		
 		if((mode & (FLASHBOARD_INIT)) != 0){
 			Flashboard.init(implType.equals(RobotFactory.ImplType.RIO)? CommInfo.Roborio2Flashboard :
@@ -74,7 +72,7 @@ public class FlashRoboUtil {
 			Scheduler.init();
 		}
 		
-		Log.logTime("FLASHLib INIT - DONE - 0x" + Integer.toHexString(mode) + " - "+implType);
+		FlashUtil.getLog().logTime("FLASHLib INIT - DONE - 0x" + Integer.toHexString(mode) + " - "+implType);
 		
 		initCode = mode;
 		init = true;

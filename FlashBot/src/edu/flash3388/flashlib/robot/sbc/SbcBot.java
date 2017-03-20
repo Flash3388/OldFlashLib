@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.sbc;
 
-import static edu.flash3388.flashlib.util.Log.*;
 import static edu.flash3388.flashlib.util.FlashUtil.*;
 import static edu.flash3388.flashlib.robot.Scheduler.*;
 
@@ -66,6 +65,7 @@ public abstract class SbcBot {
 	private static StateSelector stateSelector;
 	private static SbcBot userImplement;
 	private static Properties properties = new Properties();
+	private static Log log;
 
 	public static void main(String[] args){
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
@@ -73,19 +73,18 @@ public abstract class SbcBot {
 			System.loadLibrary(NATIVE_LIBRARY_NAME);
 		
 		setStart();
-		Log.init();
-		logTime("Initializing robot...");
+		log.logTime("Initializing robot...");
 		
-		log("Setting up shutdown hook...");
+		log.log("Setting up shutdown hook...");
 		Runtime.getRuntime().addShutdownHook(new Thread(()->onShutdown()));
-		log("Done");
+		log.log("Done");
 		
-		log("Initializing board...");
+		log.log("Initializing board...");
 		board = Platform.createBoard();
 		executor = new ShellExecutor();
-		log("Done :: board-name="+getBoardName());
+		log.log("Done :: board-name="+getBoardName());
 		
-		log("Loading settings...");
+		log.log("Loading settings...");
 		File file = new File(PROPERTIES_FILE);
 		if(file.exists())
 			properties.loadFromFile(PROPERTIES_FILE);
@@ -99,29 +98,29 @@ public abstract class SbcBot {
 		properties.saveToFile(PROPERTIES_FILE);
 		printSettings();
 		
-		log("Initializing FlashLib...");
+		log.log("Initializing FlashLib...");
 		int initcode = SCHEDULER_INIT | 
 				(getProperties().getBooleanProperty(PROP_FLASHBOARD_INIT)? FLASHBOARD_INIT : 0);
 		initFlashLib(initcode, RobotFactory.ImplType.SBC);
 		
-		log("Initializing Communications...");
+		log.log("Initializing Communications...");
 		ReadInterface inter = null;
 		try {
 			inter = setupCommInterface();
 			if(inter == null)
 				throw new Exception("Failure to initialize read interface (null)");
 		} catch (Exception e) {
-			reportError(e.getMessage());
+			log.reportError(e.getMessage());
 			shutdown(1);
 		}
 		communications = new Communications("Robot", inter, true);
 		communications.attach(executor);
-		log("Done");
+		log.log("Done");
 		
-		logTime("Initialization Done");
-		saveLog();
+		log.logTime("Initialization Done");
+		log.saveLog();
 		
-		log("Loading user class...");
+		log.log("Loading user class...");
 		SbcBot userClass = null;
 		String userClassName = "";
 		try {
@@ -130,12 +129,12 @@ public abstract class SbcBot {
 				throw new ClassNotFoundException("User class missing! Must be set to "+PROP_USER_CLASS+" property");
 			userClass = (SbcBot) Class.forName(userClassName).newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			reportError(e.getMessage());
+			log.reportError(e.getMessage());
 			shutdown(1);
 		}
-		log("User class instantiated: "+userClassName);
+		log.log("User class instantiated: "+userClassName);
 		
-		logTime("Starting Robot");
+		log.logTime("Starting Robot");
 		if(Flashboard.flashboardInit())
 			FlashRoboUtil.startFlashboard();
 		currentState = SbcState.Disabled;
@@ -177,31 +176,31 @@ public abstract class SbcBot {
 			properties.putBooleanProperty(PROP_FLASHBOARD_INIT, true);
 	}
 	private static void onShutdown(){
-		logTime("Shuting down...");
+		log.logTime("Shuting down...");
 		if(userImplement != null){
-			log("User shutdown...");
+			log.log("User shutdown...");
 			userImplement.stopRobot();
 		}
 		if(schedulerHasInstance())
 			disableScheduler(true);
 		if(communications != null){
-			log("Closing communications...");
+			log.log("Closing communications...");
 			communications.close();
-			log("Done");
+			log.log("Done");
 		}
 		if(board != null){
-			log("Shutting down board...");
+			log.log("Shutting down board...");
 			board.shutdown();
-			log("Done");
+			log.log("Done");
 		}
 		properties.saveToFile(PROPERTIES_FILE);
-		log("Settings saved");
+		log.log("Settings saved");
 		
-		logTime("Shutdown successful");
+		log.logTime("Shutdown successful");
 		boolean shutdown = properties.getBooleanProperty(PROPERTIES_FILE);
-		log("Board shutdown="+shutdown);
-		saveLog();
-		Log.getInstance().close();
+		log.log("Board shutdown="+shutdown);
+		log.saveLog();
+		log.close();
 		if(shutdown){
 			try {
 				Runtime.getRuntime().exec("shutdown -s -t 0");
@@ -221,7 +220,7 @@ public abstract class SbcBot {
 		String print = "Settings:\n";
 		for (int i = 0; i < values.length; i++) 
 			print += "\t"+keys[i]+"="+values[i]+"\n";
-		log(print);
+		log.log(print);
 	}
 	public static void setProperty(String property, String value){
 		properties.putProperty(property, value);

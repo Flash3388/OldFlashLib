@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.robot;
 import java.util.Enumeration;
 
 import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.FlashUtil;
 
 public class ConditionalAction extends Action {
 
@@ -38,7 +38,7 @@ public class ConditionalAction extends Action {
 	@Override
 	public void start(){
 		if(condition == null){
-			Log.reportError("Missing condition source");
+			FlashUtil.getLog().reportError("Missing condition source");
 			return;
 		}
 		runAction = condition.get()? actionTrue : actionFalse;

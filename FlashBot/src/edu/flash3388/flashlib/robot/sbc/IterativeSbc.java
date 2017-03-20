@@ -1,7 +1,6 @@
 package edu.flash3388.flashlib.robot.sbc;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 public abstract class IterativeSbc extends SbcBot{
 
@@ -15,8 +14,8 @@ public abstract class IterativeSbc extends SbcBot{
 		while (!stop) {
 			SbcState state = currentState();
 			if(lastObsState == null || state.value != lastObsState.value){
-				Log.saveLog();
-				Log.logTime("NEW STATE - "+state.toString());
+				FlashUtil.getLog().saveLog();
+				FlashUtil.getLog().logTime("NEW STATE - "+state.toString());
 				lastObsState = state;
 				if(state.value == SbcState.DISABLED)
 					disabledInit();

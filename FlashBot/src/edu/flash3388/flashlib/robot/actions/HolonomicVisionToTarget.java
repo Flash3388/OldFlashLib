@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
 import edu.flash3388.flashlib.robot.Action;
@@ -87,7 +86,7 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 					centered = true;
 					timecentered = millis;
 				}else if(millis - timecentered >= centeredTimeout/2){
-					Log.log("Centered time");
+					FlashUtil.getLog().log("Centered time");
 					speedX = 0;
 				}
 			}else{
@@ -116,10 +115,10 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 			speedY = lastY > 0 ? minSpeed : 0;
 		}
 		if(centered && millis - timecentered >= centeredTimeout/2){
-			Log.log("Centered time");
+			FlashUtil.getLog().log("Centered time");
 			speedX = 0;
 		}
-		Log.log("SpeedX: "+speedX+" SpeedY: "+speedY + " sideways: "+sideways+" rotate: "+rotate+
+		FlashUtil.getLog().log("SpeedX: "+speedX+" SpeedY: "+speedY + " sideways: "+sideways+" rotate: "+rotate+
 				" centered: "+centered);
 		if(sideways) driveTrain.holonomicCartesian(-speedY * 2, speedX, 0);
 		else if(!rotate) driveTrain.holonomicCartesian(speedX, speedY, 0);

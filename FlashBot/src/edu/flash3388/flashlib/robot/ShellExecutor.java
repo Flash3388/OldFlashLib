@@ -5,7 +5,6 @@ import java.io.IOException;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 public class ShellExecutor extends Sendable{
 	
@@ -95,7 +94,7 @@ public class ShellExecutor extends Sendable{
 				remoteProcess = execute(command);
 				executionCode = EXECUTE_PROGRESS;
 			} catch (IOException e) {
-				Log.reportError(e.getMessage());
+				FlashUtil.getLog().reportError(e.getMessage());
 			}
 		}
 		if(data[0] == EXECUTE_STOP){

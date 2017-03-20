@@ -3,7 +3,6 @@ package edu.flash3388.flashlib.robot.rio;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 public class PDP extends Sendable{
@@ -97,7 +96,7 @@ public class PDP extends Sendable{
 		try{
 			voltage = pdp.getVoltage();
 		}catch(Throwable t){}
-		Log.getInstance().write("PDP Voltage: "+voltage);
+		FlashUtil.getLog().log("PDP Voltage: "+voltage);
 		return voltage;
 	}
 	public double getTotalCurrent(){

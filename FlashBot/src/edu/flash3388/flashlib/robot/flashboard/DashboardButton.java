@@ -6,7 +6,7 @@ import java.util.Vector;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
 import edu.flash3388.flashlib.robot.Action;
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.FlashUtil;
 
 public class DashboardButton extends Sendable{
 
@@ -44,7 +44,7 @@ public class DashboardButton extends Sendable{
 	@Override
 	public void newData(byte[] data) {
 		if(data[0] == 1){
-			Log.log("Start");
+			FlashUtil.getLog().log("Start");
 			for(Enumeration<Action> eA = actions.elements(); eA.hasMoreElements();){
 				Action a = eA.nextElement();
 				if(!a.isRunning())

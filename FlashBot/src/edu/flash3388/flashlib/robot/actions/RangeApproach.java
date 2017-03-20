@@ -7,9 +7,6 @@ import edu.flash3388.flashlib.robot.devices.RangeFinder;
 import edu.flash3388.flashlib.robot.systems.ModableMotor;
 import edu.flash3388.flashlib.robot.systems.YAxisMovable;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
-import edu.flash3388.flashlib.vision.Analysis;
-import edu.flash3388.flashlib.vision.Vision;
 
 public class RangeApproach extends Action{
 	
@@ -65,7 +62,7 @@ public class RangeApproach extends Action{
 			moveSpeed = speed * Math.abs(offset) / 100.0;
 			moveSpeed = Mathf.limit(moveSpeed, minSpeed, maxSpeed);
 		}
-		Log.log("Speed: "+moveSpeed+" Dir: "+dir);
+		FlashUtil.getLog().log("Speed: "+moveSpeed+" Dir: "+dir);
 		driveTrain.driveY(moveSpeed, dir);
 	}
 	@Override

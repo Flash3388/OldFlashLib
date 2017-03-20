@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.robot;
 import java.util.Enumeration;
 
 import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.FlashUtil;
 
 public class SelectableAction extends Action{
 
@@ -85,11 +85,11 @@ public class SelectableAction extends Action{
 	public void start(){
 		int index = source != null? (int) source.get() : selectedIndex;
 		if(index < 0 || index >= nextActionIndex){
-			Log.reportError("Invalid action index");
+			FlashUtil.getLog().reportError("Invalid action index");
 			return;
 		}
 		if(actions[index] == null){
-			Log.reportError("Null action!!");
+			FlashUtil.getLog().reportError("Null action!!");
 			return;
 		}
 		runningAction = actions[index];

@@ -5,24 +5,30 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 import static edu.flash3388.flashlib.robot.Scheduler.*;
 import static edu.flash3388.flashlib.util.FlashUtil.*;
-import static edu.flash3388.flashlib.util.Log.*;
+
+import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.Log;
+
 import static edu.flash3388.flashlib.robot.rio.FlashRioUtil.*;
 
 public abstract class FlashRio extends SampleRobot {
+	
+	private Log log;
 	
 	@Override
 	protected void robotInit(){
 		initFlashLib();
 		initRobot();
+		log = FlashUtil.getLog();
 	}
 	@Override
 	public void robotMain() {
-		logTime("STARTING");
+		log.logTime("STARTING");
 		LiveWindow.setEnabled(false);
 		while(true){
 			if(isDisabled()){
-				saveLog();
-				logTime("NEW STATE - DISABLED");
+				log.saveLog();
+				log.logTime("NEW STATE - DISABLED");
 				disableScheduler(true);
 				m_ds.InDisabled(true);
 				disabledInit();
@@ -32,10 +38,10 @@ public abstract class FlashRio extends SampleRobot {
 					delay(5);
 				}
 				m_ds.InDisabled(false);
-				logTime("DISABLED - DONE");
+				log.logTime("DISABLED - DONE");
 			}else if(isAutonomous()){
-				saveLog();
-				logTime("NEW STATE - AUTONOMOUS");
+				log.saveLog();
+				log.logTime("NEW STATE - AUTONOMOUS");
 				disableScheduler(false);
 				m_ds.InAutonomous(true);
 				autonomousInit();
@@ -46,10 +52,10 @@ public abstract class FlashRio extends SampleRobot {
 					delay(5);
 				}
 				m_ds.InAutonomous(false);
-				logTime("AUTONOMOUS - DONE");
+				log.logTime("AUTONOMOUS - DONE");
 			}else if(isTest()){
-				saveLog();
-				logTime("NEW STATE - TEST");
+				log.saveLog();
+				log.logTime("NEW STATE - TEST");
 				disableScheduler(false);
 				m_ds.InTest(true);
 				testInit();
@@ -60,10 +66,10 @@ public abstract class FlashRio extends SampleRobot {
 					delay(5);
 				}
 				m_ds.InTest(false);
-				logTime("TEST - DONE");
+				log.logTime("TEST - DONE");
 			}else{
-				saveLog();
-				logTime("NEW STATE - TELEOP");
+				log.saveLog();
+				log.logTime("NEW STATE - TELEOP");
 				disableScheduler(false);
 				m_ds.InOperatorControl(true);
 				teleopInit();
@@ -74,7 +80,7 @@ public abstract class FlashRio extends SampleRobot {
 					delay(3);
 				}
 				m_ds.InOperatorControl(false);
-				logTime("TELEOP - DONE");
+				log.logTime("TELEOP - DONE");
 			}
 		}
 	}
