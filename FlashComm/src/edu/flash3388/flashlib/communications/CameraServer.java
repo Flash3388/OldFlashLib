@@ -9,7 +9,6 @@ import java.net.SocketException;
 
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 public class CameraServer {
 	private static class Task implements Runnable{
@@ -28,7 +27,7 @@ public class CameraServer {
 				server.sendAddress = packet.getAddress();
 				server.sendPort = packet.getPort();
 				
-				Log.log("Client Connected: "+server.sendAddress.getHostAddress()+
+				FlashUtil.getLog().log("Client Connected: "+server.sendAddress.getHostAddress()+
 						":"+server.sendPort, server.logName);
 				
 				byte[] checkBytes = HANDSHAKE;
@@ -65,7 +64,7 @@ public class CameraServer {
 						server.sendPort = packet.getPort();
 				        
 						if(port != server.sendPort || !address.equals(address))
-							Log.log("Client Connected: "+server.sendAddress.getHostAddress()+":"+
+							FlashUtil.getLog().log("Client Connected: "+server.sendAddress.getHostAddress()+":"+
 									server.sendPort, server.logName);
 						
 		            	lastCheck = cmillis;
@@ -73,7 +72,7 @@ public class CameraServer {
 		            cmillis = FlashUtil.millis();
 				}
 			} catch (IOException e) {
-				Log.reportError(e.getMessage());
+				FlashUtil.getLog().reportError(e.getMessage());
 			}
 		}
 	}

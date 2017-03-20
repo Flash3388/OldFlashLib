@@ -12,7 +12,6 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 
 public class CameraClient {
@@ -25,7 +24,7 @@ public class CameraClient {
 		
 		@Override
 		public void run() {
-			Log.log("Running", client.logName);
+			FlashUtil.getLog().log("Running", client.logName);
 			while(!client.stop){
 				if(!client.connected)
 					client.write(HANDSHAKE);
@@ -86,7 +85,7 @@ public class CameraClient {
 			
 			if(!connected) {
 				connected = true;
-				Log.log("Connection Established", logName);
+				FlashUtil.getLog().log("Connection Established", logName);
 			}
 			if(len <= 10){
 				write(HANDSHAKE);
@@ -105,7 +104,7 @@ public class CameraClient {
 		} catch(SocketTimeoutException e1){
 			if(connected){
 				connected = false;
-				Log.log("Connection Lost", logName);
+				FlashUtil.getLog().log("Connection Lost", logName);
 			}
 		}catch (IOException | NumberFormatException e) {
 		}

@@ -6,7 +6,6 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 public class Communications {
 	private static class CommTask implements Runnable{
@@ -23,11 +22,11 @@ public class Communications {
 		public void run() {
 			try{
 				while(!stop){
-					Log.log("Searching for remote connection", comm.logName);
+					FlashUtil.getLog().log("Searching for remote connection", comm.logName);
 					while(!comm.connect() && !stop);
 					if(stop) break;
 					
-					Log.log("Connected", comm.logName);
+					FlashUtil.getLog().log("Connected", comm.logName);
 					comm.resetAll();
 					comm.updateClock();
 					comm.lastRead = comm.readClock();
@@ -43,12 +42,12 @@ public class Communications {
 						if(comm.connectionTimedout()){
 							timeouts++;
 							long time = comm.currentMillis - comm.lastRead;
-							Log.log("TIMEOUT " + timeouts + " :: "+time, comm.logName);
+							FlashUtil.getLog().log("TIMEOUT " + timeouts + " :: "+time, comm.logName);
 							comm.lastRead = comm.readClock();
 							timeLastTimeout = comm.readClock();
 						}
 						if(timeouts >= maxTimeouts){
-							Log.log("Connection lost", comm.logName);
+							FlashUtil.getLog().log("Connection lost", comm.logName);
 							comm.connected = false;
 							break;
 						}
@@ -56,16 +55,16 @@ public class Communications {
 								comm.readClock() - timeLastTimeout > (comm.connectionTimeout*3)){
 							timeouts = 0;
 							timeLastTimeout = -1;
-							Log.log("Timeout Reset", comm.logName);
+							FlashUtil.getLog().log("Timeout Reset", comm.logName);
 						}
 						comm.writeHandshake();
 						FlashUtil.delay(1);
 					}
 					comm.onDisconnect();
-					Log.log("Disconnected", comm.logName);
+					FlashUtil.getLog().log("Disconnected", comm.logName);
 				}
 			}catch(IOException e){
-				Log.reportError(e.getMessage());
+				FlashUtil.getLog().reportError(e.getMessage());
 				comm.disconnect();
 			}
 		}
@@ -109,7 +108,7 @@ public class Communications {
 		setConnectionTimeout(CONNECTION_TIMEOUT);
 		
 		initializeConcurrency();
-		Log.log("Initialized", logName);
+		FlashUtil.getLog().log("Initialized", logName);
 		
 		sendables = new Vector<Sendable>();
 		setBufferSize(MAX_REC_LENGTH);
