@@ -31,6 +31,7 @@ public abstract class FlashRio extends SampleRobot {
 		while(true){
 			if(isDisabled()){
 				log.saveLog();
+				powerLog.saveLog();
 				log.logTime("NEW STATE - DISABLED");
 				disableScheduler(true);
 				m_ds.InDisabled(true);
@@ -45,6 +46,7 @@ public abstract class FlashRio extends SampleRobot {
 				log.logTime("DISABLED - DONE");
 			}else if(isAutonomous()){
 				log.saveLog();
+				powerLog.saveLog();
 				log.logTime("NEW STATE - AUTONOMOUS");
 				disableScheduler(false);
 				m_ds.InAutonomous(true);
@@ -60,6 +62,7 @@ public abstract class FlashRio extends SampleRobot {
 				log.logTime("AUTONOMOUS - DONE");
 			}else if(isTest()){
 				log.saveLog();
+				powerLog.saveLog();
 				log.logTime("NEW STATE - TEST");
 				disableScheduler(false);
 				m_ds.InTest(true);
@@ -75,6 +78,7 @@ public abstract class FlashRio extends SampleRobot {
 				log.logTime("TEST - DONE");
 			}else{
 				log.saveLog();
+				powerLog.saveLog();
 				log.logTime("NEW STATE - TELEOP");
 				disableScheduler(false);
 				m_ds.InOperatorControl(true);
@@ -94,10 +98,11 @@ public abstract class FlashRio extends SampleRobot {
 	
 	private void logPower(){
 		double volts = m_ds.getBatteryVoltage();
+		double matchTime = m_ds.getMatchTime();
 		if(volts < 10)
-			powerLog.logTime("Power bellow 10: "+volts+"v");
+			powerLog.logTime("Power bellow 10: "+volts+"v >> Time: "+matchTime);
 		if(m_ds.isBrownedOut())
-			powerLog.logTime("Browned out!!");
+			powerLog.logTime("Browned out!! >> Time: "+matchTime);
 	}
 	
 	protected abstract void initRobot();
