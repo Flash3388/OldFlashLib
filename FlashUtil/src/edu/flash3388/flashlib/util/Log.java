@@ -45,7 +45,7 @@ public class Log{
 		logLines = new Queue<String>(100);
 		errorLines = new Queue<String>(100);
 		try {
-			System.out.println(name+">Log file: "+logFile.getAbsolutePath());
+			System.out.println(name+"> Log file: "+logFile.getAbsolutePath());
 			if(!logFile.exists())
 				logFile.createNewFile();
 			
