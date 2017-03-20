@@ -7,6 +7,7 @@ import edu.flash3388.flashlib.robot.flashboard.SendableLog;
 import edu.flash3388.flashlib.robot.hid.Joystick;
 import edu.flash3388.flashlib.robot.hid.XboxController;
 import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.Log;
 
 public class FlashRoboUtil {
 	private FlashRoboUtil(){}
@@ -58,8 +59,9 @@ public class FlashRoboUtil {
 		if(init) 
 			throw new IllegalStateException("FlashLib was already initialized!");
 		
-		RobotFactory.setImplementationType(implType);
+		Log.setParentDirectory("/home/lvuser");
 		FlashUtil.setStart();
+		RobotFactory.setImplementationType(implType);
 		
 		FlashUtil.getLog().logTime("INITIALIZING...");
 		
