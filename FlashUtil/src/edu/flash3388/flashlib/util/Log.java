@@ -29,7 +29,7 @@ public class Log{
 	private File logFile, errorFile;
 	private boolean closed = true;
 	
-	public Log(String name){
+	public Log(String name, boolean override){
 		this.name = name;
 		DateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
 		directory += dateFormat.format(new Date()) + "/";
@@ -39,13 +39,15 @@ public class Log{
 		
 		int counter = 1;
 		logFile = new File(directory + name + extension);
-		while(logFile.exists())
+		while(logFile.exists() && !override)
 			logFile = new File(directory + name + (counter++) + extension);
 		
 		logLines = new Queue<String>(100);
 		errorLines = new Queue<String>(100);
 		try {
-			logFile.createNewFile();
+			System.out.println(name+">Log file: "+logFile.getAbsolutePath());
+			if(!logFile.exists())
+				logFile.createNewFile();
 			
 			errorFile = new File(directory + name + counter + "_ERROR" + extension);
 			if(!errorFile.exists())
@@ -54,6 +56,9 @@ public class Log{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	public Log(String name){
+		this(name, false);
 	}
 	
 	@Override
