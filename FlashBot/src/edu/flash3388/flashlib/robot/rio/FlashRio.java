@@ -27,27 +27,33 @@ public abstract class FlashRio extends SampleRobot {
 	public void robotMain() {
 		log.logTime("STARTING");
 		LiveWindow.setEnabled(false);
-		powerLog.log("Starting >> "+m_ds.getBatteryVoltage(), "Power");
+		powerLog.logTime("Starting Voltage: "+m_ds.getBatteryVoltage(), m_ds.getMatchTime());
 		while(true){
 			if(isDisabled()){
+				log.logTime("NEW STATE - DISABLED");
+				powerLog.logTime("New State: Disabled >> Voltage: "+m_ds.getBatteryVoltage(),
+						m_ds.getMatchTime());
 				log.saveLog();
 				powerLog.saveLog();
-				log.logTime("NEW STATE - DISABLED");
 				disableScheduler(true);
 				m_ds.InDisabled(true);
 				disabledInit();
 				
 				while(isDisabled()){
 					disabledPeriodic();
-					logPower();
+					logLowVoltage();
 					delay(5);
 				}
 				m_ds.InDisabled(false);
 				log.logTime("DISABLED - DONE");
+				powerLog.logTime("Done State: Disabled >> Voltage: "+m_ds.getBatteryVoltage(),
+						m_ds.getMatchTime());
 			}else if(isAutonomous()){
+				log.logTime("NEW STATE - AUTONOMOUS");
+				powerLog.logTime("New State: Autonomous >> Voltage: "+m_ds.getBatteryVoltage(),
+						m_ds.getMatchTime());
 				log.saveLog();
 				powerLog.saveLog();
-				log.logTime("NEW STATE - AUTONOMOUS");
 				disableScheduler(false);
 				m_ds.InAutonomous(true);
 				autonomousInit();
@@ -55,15 +61,19 @@ public abstract class FlashRio extends SampleRobot {
 				while(isEnabled() && isAutonomous()){
 					runScheduler();
 					autonomousPeriodic();
-					logPower();
+					logLowVoltage();
 					delay(5);
 				}
 				m_ds.InAutonomous(false);
 				log.logTime("AUTONOMOUS - DONE");
+				powerLog.logTime("Done State: Autonomous >> Voltage: "+m_ds.getBatteryVoltage(),
+						m_ds.getMatchTime());
 			}else if(isTest()){
+				log.logTime("NEW STATE - TEST");
+				powerLog.logTime("New State: Test >> Voltage: "+m_ds.getBatteryVoltage(),
+						m_ds.getMatchTime());
 				log.saveLog();
 				powerLog.saveLog();
-				log.logTime("NEW STATE - TEST");
 				disableScheduler(false);
 				m_ds.InTest(true);
 				testInit();
@@ -71,15 +81,19 @@ public abstract class FlashRio extends SampleRobot {
 				while(isEnabled() && isTest()){
 					runScheduler();
 					testPeriodic();
-					logPower();
+					logLowVoltage();
 					delay(5);
 				}
 				m_ds.InTest(false);
 				log.logTime("TEST - DONE");
+				powerLog.logTime("Done State: Test >> Voltage: "+m_ds.getBatteryVoltage(),
+						m_ds.getMatchTime());
 			}else{
+				log.logTime("NEW STATE - TELEOP");
+				powerLog.logTime("New State: Teleop >> Voltage: "+m_ds.getBatteryVoltage(),
+						m_ds.getMatchTime());
 				log.saveLog();
 				powerLog.saveLog();
-				log.logTime("NEW STATE - TELEOP");
 				disableScheduler(false);
 				m_ds.InOperatorControl(true);
 				teleopInit();
@@ -87,22 +101,33 @@ public abstract class FlashRio extends SampleRobot {
 				while(isEnabled() && isOperatorControl()){
 					runScheduler();
 					teleopPeriodic();
-					logPower();
+					logLowVoltage();
 					delay(3);
 				}
 				m_ds.InOperatorControl(false);
 				log.logTime("TELEOP - DONE");
+				powerLog.logTime("Done State: Teleop >> Voltage: "+m_ds.getBatteryVoltage(),
+						m_ds.getMatchTime());
 			}
 		}
 	}
 	
-	private void logPower(){
+	private void logLowVoltage(){
 		double volts = m_ds.getBatteryVoltage();
 		double matchTime = m_ds.getMatchTime();
-		if(volts < 10)
-			powerLog.logTime("Power bellow 10: "+volts+"v >> Time: "+matchTime);
-		if(m_ds.isBrownedOut())
-			powerLog.logTime("Browned out!! >> Time: "+matchTime);
+		boolean emergencySave = false;
+		if(volts < 10){
+			powerLog.logTime("Low Voltage: "+volts, matchTime);
+			emergencySave = true;
+		}
+		if(m_ds.isBrownedOut()){
+			powerLog.logTime("Browned Out", matchTime);
+			emergencySave = true;
+		}
+		if(emergencySave){
+			powerLog.save();
+			log.save();
+		}
 	}
 	
 	protected abstract void initRobot();

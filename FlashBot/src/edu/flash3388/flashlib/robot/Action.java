@@ -27,6 +27,14 @@ public abstract class Action {
 	private boolean running = false;
 	private long timeout = -1;
 	private long start_time = -1;
+	private String name;
+	
+	public Action(String name){
+		this.name = name;
+	}
+	public Action(){
+		this("");
+	}
 	
 	public void start(){
 		initialized = false;
@@ -63,6 +71,12 @@ public abstract class Action {
 		return !isFinished();
 	}
 	
+	public String getName(){
+		return name;
+	}
+	public void setName(String name){
+		this.name = name;
+	}
 	public boolean isCanceled(){
 		return canceled;
 	}
