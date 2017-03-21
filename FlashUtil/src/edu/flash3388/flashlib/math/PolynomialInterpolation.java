@@ -2,12 +2,12 @@ package edu.flash3388.flashlib.math;
 
 import edu.flash3388.flashlib.util.Algorithms;
 
-public class NewtonianInterpolation extends Interpolation{
+public class PolynomialInterpolation extends Interpolation{
 	
 	private Double[] values, keys;
 	private boolean valueUpdated = false;
 	
-	public NewtonianInterpolation(double keyMargin){
+	public PolynomialInterpolation(double keyMargin){
 		super(keyMargin);
 	}
 	

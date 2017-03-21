@@ -1,9 +1,5 @@
 package edu.flash3388.flashlib.testing;
 
-import java.util.Scanner;
-
-import edu.flash3388.flashlib.math.Interpolation;
-import edu.flash3388.flashlib.math.NewtonianInterpolation;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 
@@ -19,15 +15,7 @@ public class Main {
 		log.logTime("Logging");
 		log.reportError("Error");
 		
-		log.save();
-		
-		/*Interpolation lerp = new NewtonianInterpolation(20);
-		lerp.readFromFile("/home/tomtzook/frc/interpolation.ini");
-		Scanner in = new Scanner(System.in);
-		while(true){
-			double d = in.nextDouble();
-			System.out.println(d+"="+lerp.interpolate(d));
-		}*/
+		log.close();
 	}
 
 }

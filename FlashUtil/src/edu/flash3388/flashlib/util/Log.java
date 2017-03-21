@@ -17,30 +17,30 @@ import edu.flash3388.flashlib.io.FileStream;
  */
 public class Log{
 	
+	private static final String EXTENSION = ".flog";
+	private static final String ERROR_EXTENSION = ".elog";
 	private static String parentDirectory = "";
 	
 	private Vector<LoggingInterface> loggingInterfaces = new Vector<LoggingInterface>(2);
 	
-	private String extension = ".flog";
-	private String directory = parentDirectory+"logs/log_";
 	private String name;
 	
 	private Queue<String> logLines, errorLines;
 	private File logFile, errorFile;
 	private boolean closed = true;
 	
-	public Log(String name, boolean override){
+	public Log(String directory, String name, boolean override){
 		this.name = name;
 		DateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
-		directory += dateFormat.format(new Date()) + "/";
+		directory += dateFormat.format(new Date()) + "/" + name + "/";
 		File file = new File(directory);
 		if(!file.exists())
 			file.mkdirs();
 		
-		int counter = 1;
-		logFile = new File(directory + name + extension);
+		int counter = 0;
+		logFile = new File(directory + name + EXTENSION);
 		while(logFile.exists() && !override)
-			logFile = new File(directory + name + (counter++) + extension);
+			logFile = new File(directory + name + (++counter) + EXTENSION);
 		
 		logLines = new Queue<String>(100);
 		errorLines = new Queue<String>(100);
@@ -49,13 +49,16 @@ public class Log{
 			if(!logFile.exists())
 				logFile.createNewFile();
 			
-			errorFile = new File(directory + name + counter + "_ERROR" + extension);
+			errorFile = new File(directory + name + (counter > 0? counter : "") + ERROR_EXTENSION);
 			if(!errorFile.exists())
 				errorFile.createNewFile();
 			closed = false;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	public Log(String name, boolean override){
+		this(parentDirectory+"logs/log_", name, override);
 	}
 	public Log(String name){
 		this(name, false);
@@ -67,16 +70,16 @@ public class Log{
 		super.finalize();
 	}
 	
-	private void write(String mess){
+	public void write(String mess){
 		if(isClosed()) return;
 		logLines.enqueue(mess);
 	}
-	private void writeError(String mess){
+	public void writeError(String mess){
 		if(isClosed()) return;
 		mess = (FlashUtil.secs()) + ": " + mess;
 		errorLines.enqueue(mess);
 	}
-	private void writeError(String mess, String stacktrace){
+	public void writeError(String mess, String stacktrace){
 		if(isClosed()) return;
 		mess = (FlashUtil.secs()) + ": " + mess;
 		errorLines.enqueue(mess);
@@ -153,12 +156,15 @@ public class Log{
 		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
 			lEnum.nextElement().log(msg);
 	}
-	public void logTime(String msg){
-		msg = FlashUtil.secs() + " : ---------->" + msg;
+	public void logTime(String msg, double time){
+		msg = time + " : ---------->" + msg;
 		write(msg);
 		System.out.println(name + "> " + msg);
 		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
 			lEnum.nextElement().log(msg);
+	}
+	public void logTime(String msg){
+		logTime(msg, FlashUtil.secs());
 	}
 	
 	
