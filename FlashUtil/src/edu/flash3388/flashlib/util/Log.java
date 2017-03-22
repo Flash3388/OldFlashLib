@@ -31,8 +31,9 @@ public class Log{
 	
 	public Log(String directory, String name, boolean override){
 		this.name = name;
+		Date date = new Date();
 		DateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
-		directory += dateFormat.format(new Date()) + "/" + name + "/";
+		directory += name + "/" + "log_" + dateFormat.format(date) + "/";
 		File file = new File(directory);
 		if(!file.exists())
 			file.mkdirs();
@@ -48,6 +49,8 @@ public class Log{
 			System.out.println(name+"> Log file: "+logFile.getAbsolutePath());
 			if(!logFile.exists())
 				logFile.createNewFile();
+			dateFormat = new SimpleDateFormat("hh:mm:ss");
+			FileStream.writeLine(logFile.getAbsolutePath(), "Time: "+dateFormat.format(date));
 			
 			errorFile = new File(directory + name + (counter > 0? counter : "") + ERROR_EXTENSION);
 			if(!errorFile.exists())
@@ -58,7 +61,7 @@ public class Log{
 		}
 	}
 	public Log(String name, boolean override){
-		this(parentDirectory+"logs/log_", name, override);
+		this(parentDirectory+"logs/", name, override);
 	}
 	public Log(String name){
 		this(name, false);
@@ -119,9 +122,8 @@ public class Log{
 	}
 	
 	public void reportError(String error){
-		String err = "ERROR\n" + 
-					FlashUtil.secs() + " : " + error + 
-					"\n--------------------------";
+		String err = "ERROR\n\t" + 
+					FlashUtil.secs() + " : " + error;
 		String trace = getErrorStackTrace();
 		writeError(error, trace);
 		write(err);
@@ -130,9 +132,8 @@ public class Log{
 			lEnum.nextElement().reportError(error);
 	}
 	public void reportWarning(String warning){
-		String war = "WARNING\n" + 
-				FlashUtil.secs() + " : " + warning + 
-				"\n--------------------------";
+		String war = "WARNING\n\t" + 
+				FlashUtil.secs() + " : " + warning;
 		System.err.println(name + "> " + war);
 		writeError("WARNING - " +warning);
 		write(war);
