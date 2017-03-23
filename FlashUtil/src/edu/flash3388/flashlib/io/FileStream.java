@@ -48,6 +48,18 @@ public class FileStream {
 		writer.write(lines);
 		writer.close();
 	}
+	public static void appendLines(String file, String[] lines){
+		String[] readLines = null;
+		try {
+			readLines = readAllLines(file);
+		} catch (NullPointerException | IOException e) {
+		}
+		FileWriter writer = new FileWriter(file);
+		if(readLines != null)
+			writer.write(readLines);
+		writer.write(lines);
+		writer.close();
+	}
 	public static void writeLine(String file, String line){
 		FileWriter writer = new FileWriter(file);
 		writer.write(line);

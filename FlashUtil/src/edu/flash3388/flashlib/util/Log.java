@@ -104,12 +104,12 @@ public class Log{
 		String[] lines = logLines.toArray(new String[0]);
 		logLines.clear();
 		
-		FileStream.writeLines(logFile.getAbsolutePath(), lines);
+		FileStream.appendLines(logFile.getAbsolutePath(), lines);
 		
 		lines = errorLines.toArray(new String[0]);
 		errorLines.clear();
 		
-		FileStream.writeLines(errorFile.getAbsolutePath(), lines);
+		FileStream.appendLines(errorFile.getAbsolutePath(), lines);
 		
 		closed = false;
 	}

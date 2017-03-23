@@ -15,6 +15,12 @@ public class Main {
 		log.logTime("Logging");
 		log.reportError("Error");
 		
+		log.save();
+		
+		log.log("Logging...2");
+		log.log("Logging...2");
+		log.logTime("Logging2");
+		
 		log.close();
 	}
 
