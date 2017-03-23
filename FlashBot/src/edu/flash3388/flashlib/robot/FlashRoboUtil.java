@@ -59,7 +59,6 @@ public class FlashRoboUtil {
 		if(init) 
 			throw new IllegalStateException("FlashLib was already initialized!");
 		
-		Log.setParentDirectory("/home/lvuser");
 		FlashUtil.setStart();
 		RobotFactory.setImplementationType(implType);
 		
