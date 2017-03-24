@@ -1,11 +1,10 @@
 package edu.flash3388.flashlib.robot;
 
-//import edu.flash3388.flashlib.systems.System;
-
 import java.util.Enumeration;
 import java.util.Vector;
 
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.FlashUtil;
+import edu.flash3388.flashlib.util.Queue;
 
 public class ActionGroup extends Action{
 
@@ -17,6 +16,7 @@ public class ActionGroup extends Action{
 	private Vector<Entry> actions = new Vector<Entry>(5);
 	private int index = -1;
 	private Vector<Entry> current = new Vector<Entry>(5);
+	private Queue<Entry> entries = new Queue<Entry>();
 	
 	public ActionGroup(){}
 	public ActionGroup(Action...actions){
@@ -72,7 +72,7 @@ public class ActionGroup extends Action{
 	protected void initialize(){
 		index = 0;
 		Entry c = actions.elementAt(index);
-		Log.log("Stating action-"+c.action.getClass().getName());
+		FlashUtil.getLog().log("Stating action-"+c.action.getClass().getName());
 		c.action.start();
 		current.addElement(c);
 	}
@@ -98,7 +98,7 @@ public class ActionGroup extends Action{
 		
 		if(next && index < actions.size()){
 			Entry toRun = actions.elementAt(index);
-			Log.log("Starting action-"+toRun.action.getClass().getName());
+			FlashUtil.getLog().log("Starting action-"+toRun.action.getClass().getName());
 			toRun.action.start();
 			current.add(toRun);
 		}

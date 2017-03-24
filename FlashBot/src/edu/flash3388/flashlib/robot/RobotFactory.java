@@ -10,7 +10,7 @@ import edu.flash3388.flashlib.robot.hid.RioTrigger;
 import edu.flash3388.flashlib.robot.hid.Stick;
 import edu.flash3388.flashlib.robot.hid.StickRio;
 import edu.flash3388.flashlib.robot.hid.Triggers.Trigger;
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.LoggingInterface;
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -27,7 +27,7 @@ public class RobotFactory {
 		RobotFactory.type = type;
 		
 		if(type.equals(ImplType.RIO)){
-			Log.addLoggingInterface(new LoggingInterface(){
+			FlashUtil.getLog().addLoggingInterface(new LoggingInterface(){
 				@Override
 				public void reportError(String err) {
 					DriverStation.reportError(err, false);

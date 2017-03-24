@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
 import edu.flash3388.flashlib.robot.Action;
@@ -108,13 +107,13 @@ public class VisionRotate extends Action implements VisionAction{
 		if(lastDir != dir){
 			speed /= 1.2;
 			rotateSpeed /= 1.2;
-			Log.log("Lowering Speed");
+			FlashUtil.getLog().log("Lowering Speed");
 		}
 		if(differences > 0 && Math.abs(pixelDifference - lastPixels) <= margin){
 			rotateSpeed = 0;
-			Log.log("Predicted Stop");
+			FlashUtil.getLog().log("Predicted Stop");
 		}
-		Log.log("Speed: "+rotateSpeed+" Dir: "+dir+" Differences: "+differences+" PixelsD: "+pixelDifference + " L: "+lastPixels);
+		FlashUtil.getLog().log("Speed: "+rotateSpeed+" Dir: "+dir+" Differences: "+differences+" PixelsD: "+pixelDifference + " L: "+lastPixels);
 		driveTrain.rotate(rotateSpeed, dir);
 		lastDir = dir;
 		lastSpeed = rotateSpeed;

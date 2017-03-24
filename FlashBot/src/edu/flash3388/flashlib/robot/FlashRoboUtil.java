@@ -59,25 +59,27 @@ public class FlashRoboUtil {
 		if(init) 
 			throw new IllegalStateException("FlashLib was already initialized!");
 		
-		RobotFactory.setImplementationType(implType);
+		Log.setParentDirectory("/home/lvuser");
 		FlashUtil.setStart();
+		RobotFactory.setImplementationType(implType);
 		
-		Log.init();
-		Log.logTime("INITIALIZING...");
+		FlashUtil.getLog().logTime("INITIALIZING...");
 		
 		if((mode & (FLASHBOARD_INIT)) != 0){
 			Flashboard.init(implType.equals(RobotFactory.ImplType.RIO)? CommInfo.Roborio2Flashboard :
-				null);
+				CommInfo.Roborio2Flashboard);
 			Flashboard.attach(new SendableLog());
-			Flashboard.start();
 		}
 		if((mode & (SCHEDULER_INIT)) != 0){
 			Scheduler.init();
 		}
 		
-		Log.logTime("FLASHLib INIT - DONE - 0x" + Integer.toHexString(mode) + " - "+implType);
+		FlashUtil.getLog().logTime("FLASHLib INIT - DONE - 0x" + Integer.toHexString(mode) + " - "+implType);
 		
 		initCode = mode;
 		init = true;
+	}
+	public static void startFlashboard(){
+		Flashboard.start();
 	}
 }

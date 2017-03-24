@@ -40,4 +40,7 @@ public class MaxbotixUltrasonic extends SensorBase implements RangeFinder{
 		}
 		return -1;
 	}
+
+	@Override
+	public void ping() {}
 }

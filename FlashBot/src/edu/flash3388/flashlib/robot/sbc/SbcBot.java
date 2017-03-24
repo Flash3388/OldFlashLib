@@ -1,6 +1,5 @@
 package edu.flash3388.flashlib.robot.sbc;
 
-import static edu.flash3388.flashlib.util.Log.*;
 import static edu.flash3388.flashlib.util.FlashUtil.*;
 import static edu.flash3388.flashlib.robot.Scheduler.*;
 
@@ -12,8 +11,10 @@ import edu.flash3388.flashlib.communications.CommInfo;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.ReadInterface;
 import edu.flash3388.flashlib.communications.UDPReadInterface;
+import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.ShellExecutor;
+import edu.flash3388.flashlib.robot.flashboard.Flashboard;
 import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.Properties;
 import io.silverspoon.bulldog.core.io.IOPort;
@@ -26,12 +27,33 @@ import io.silverspoon.bulldog.core.platform.Platform;
 
 import static edu.flash3388.flashlib.robot.FlashRoboUtil.*;
 
-public abstract class Robot {
+public abstract class SbcBot {
+	
+	public static enum SbcState{
+		Disabled((byte)0x01), Enabled((byte)0x02);
+		
+		public final byte value;
+		SbcState(byte value){
+			this.value = value;
+		}
+		
+		public static final byte DISABLED = 0x01;
+		public static final byte ENABLED = 0x02;
+		
+		public static SbcState byValue(byte val){
+			switch (val) {
+				case DISABLED: return SbcState.Disabled;
+				case ENABLED: return SbcState.Enabled;
+			}
+			return null;
+		}
+	}
 	
 	public static final String PROP_USER_CLASS = "user.class";
 	public static final String PROP_SHUTDOWN_ON_EXIT = "board.shutdown";
 	public static final String PROP_COMM_PORT = "board.commport";
 	public static final String PROP_COMM_TYPE = "board.commtype";
+	public static final String PROP_FLASHBOARD_INIT = "lib.flashboard.init";
 	
 	private static final String NATIVE_LIBRARY_NAME = "";
 	private static final String PROPERTIES_FILE = "robot.ini";
@@ -39,7 +61,11 @@ public abstract class Robot {
 	private static Board board;
 	private static ShellExecutor executor;
 	private static Communications communications;
+	private static SbcState currentState;
+	private static StateSelector stateSelector;
+	private static SbcBot userImplement;
 	private static Properties properties = new Properties();
+	private static Log log;
 
 	public static void main(String[] args){
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
@@ -47,10 +73,18 @@ public abstract class Robot {
 			System.loadLibrary(NATIVE_LIBRARY_NAME);
 		
 		setStart();
-		Log.init();
-		logTime("Initializing robot...");
+		log.logTime("Initializing robot...");
 		
-		log("Loading settings...");
+		log.log("Setting up shutdown hook...");
+		Runtime.getRuntime().addShutdownHook(new Thread(()->onShutdown()));
+		log.log("Done");
+		
+		log.log("Initializing board...");
+		board = Platform.createBoard();
+		executor = new ShellExecutor();
+		log.log("Done :: board-name="+getBoardName());
+		
+		log.log("Loading settings...");
 		File file = new File(PROPERTIES_FILE);
 		if(file.exists())
 			properties.loadFromFile(PROPERTIES_FILE);
@@ -58,64 +92,61 @@ public abstract class Robot {
 			try {
 				file.createNewFile();
 			} catch (IOException e) {}
-			loadDefaultSettings();
 		}
+		loadDefaultSettings();
 		loadSettings(args);
 		properties.saveToFile(PROPERTIES_FILE);
 		printSettings();
 		
-		log("Setting up shutdown hook...");
-		Runtime.getRuntime().addShutdownHook(new Thread(()->onShutdown()));
-		log("Done");
+		log.log("Initializing FlashLib...");
+		int initcode = SCHEDULER_INIT | 
+				(getProperties().getBooleanProperty(PROP_FLASHBOARD_INIT)? FLASHBOARD_INIT : 0);
+		initFlashLib(initcode, RobotFactory.ImplType.SBC);
 		
-		log("Initializing board...");
-		board = Platform.createBoard();
-		executor = new ShellExecutor();
-		log("Done :: board-name="+getBoardName());
-		
-		log("Initializing FlashLib...");
-		initFlashLib(FLASHBOARD_INIT | SCHEDULER_INIT, RobotFactory.ImplType.SBC);
-		
-		log("Initializing Communications...");
+		log.log("Initializing Communications...");
 		ReadInterface inter = null;
 		try {
 			inter = setupCommInterface();
 			if(inter == null)
 				throw new Exception("Failure to initialize read interface (null)");
 		} catch (Exception e) {
-			reportError(e.getMessage());
+			log.reportError(e.getMessage());
 			shutdown(1);
 		}
 		communications = new Communications("Robot", inter, true);
 		communications.attach(executor);
-		communications.start();
-		log("Done");
+		log.log("Done");
 		
-		logTime("Initialization Done");
-		saveLog();
+		log.logTime("Initialization Done");
+		log.saveLog();
 		
-		log("Loading user class...");
-		Robot userClass = null;
+		log.log("Loading user class...");
+		SbcBot userClass = null;
 		String userClassName = "";
 		try {
 			userClassName = properties.getProperty(PROP_USER_CLASS);
 			if(userClassName == null || userClassName.equals(""))
 				throw new ClassNotFoundException("User class missing! Must be set to "+PROP_USER_CLASS+" property");
-			userClass = (Robot) Class.forName(userClassName).newInstance();
+			userClass = (SbcBot) Class.forName(userClassName).newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-			reportError(e.getMessage());
+			log.reportError(e.getMessage());
 			shutdown(1);
 		}
-		log("User class instantiated: "+userClassName);
+		log.log("User class instantiated: "+userClassName);
 		
-		logTime("Starting Robot");
+		log.logTime("Starting Robot");
+		if(Flashboard.flashboardInit())
+			FlashRoboUtil.startFlashboard();
+		currentState = SbcState.Disabled;
+		userImplement = userClass;
+		communications.start();
 		userClass.startRobot();
 	}
 	private static ReadInterface setupCommInterface() throws SocketException{
 		int port = properties.getIntegerProperty(PROP_COMM_PORT);
 		if(port <= 0) return null;
 		String interfaceType = properties.getProperty(PROP_COMM_TYPE);
-		if(interfaceType.equals("udp"))
+		if(interfaceType.equalsIgnoreCase("udp"))
 			return new UDPReadInterface(port);
 		return null;
 	}
@@ -135,33 +166,41 @@ public abstract class Robot {
 		}
 	}
 	private static void loadDefaultSettings(){
-		properties.putBooleanProperty(PROP_SHUTDOWN_ON_EXIT, false);
-		properties.putIntegerProperty(PROP_COMM_PORT, getPortByBoard());
-		properties.putProperty(PROP_COMM_TYPE, "udp");
+		if(properties.getProperty(PROP_SHUTDOWN_ON_EXIT) == null)
+			properties.putBooleanProperty(PROP_SHUTDOWN_ON_EXIT, false);
+		if(properties.getProperty(PROP_COMM_PORT) == null)
+			properties.putIntegerProperty(PROP_COMM_PORT, getPortByBoard());
+		if(properties.getProperty(PROP_COMM_TYPE) == null)
+			properties.putProperty(PROP_COMM_TYPE, "udp");
+		if(properties.getProperty(PROP_FLASHBOARD_INIT) == null)
+			properties.putBooleanProperty(PROP_FLASHBOARD_INIT, true);
 	}
 	private static void onShutdown(){
-		logTime("Shuting down...");
-		
+		log.logTime("Shuting down...");
+		if(userImplement != null){
+			log.log("User shutdown...");
+			userImplement.stopRobot();
+		}
 		if(schedulerHasInstance())
 			disableScheduler(true);
 		if(communications != null){
-			log("Closing communications...");
+			log.log("Closing communications...");
 			communications.close();
-			log("Done");
+			log.log("Done");
 		}
 		if(board != null){
-			log("Shutting down board...");
+			log.log("Shutting down board...");
 			board.shutdown();
-			log("Done");
+			log.log("Done");
 		}
 		properties.saveToFile(PROPERTIES_FILE);
-		log("Settings saved");
+		log.log("Settings saved");
 		
-		logTime("Shutdown successful");
+		log.logTime("Shutdown successful");
 		boolean shutdown = properties.getBooleanProperty(PROPERTIES_FILE);
-		log("Board shutdown="+shutdown);
-		saveLog();
-		Log.getInstance().close();
+		log.log("Board shutdown="+shutdown);
+		log.saveLog();
+		log.close();
 		if(shutdown){
 			try {
 				Runtime.getRuntime().exec("shutdown -s -t 0");
@@ -180,8 +219,8 @@ public abstract class Robot {
 				 values = properties.values();
 		String print = "Settings:\n";
 		for (int i = 0; i < values.length; i++) 
-			print += "\r"+keys[i]+"="+values[i];
-		log(print);
+			print += "\t"+keys[i]+"="+values[i]+"\n";
+		log.log(print);
 	}
 	public static void setProperty(String property, String value){
 		properties.putProperty(property, value);
@@ -191,6 +230,20 @@ public abstract class Robot {
 	}
 	public static Properties getProperties(){
 		return properties;
+	}
+	
+	public static SbcState currentState(){
+		if (stateSelector != null) {
+			SbcState nState = stateSelector.getState();
+			currentState = nState != null? nState : SbcState.Disabled;
+		}
+		return currentState;
+	}
+	public static boolean isDisabled(){
+		return currentState.value == SbcState.DISABLED;
+	}
+	public static boolean isEnabled(){
+		return currentState.value == SbcState.ENABLED;
 	}
 	
 	public static ShellExecutor shell(){
@@ -225,4 +278,5 @@ public abstract class Robot {
 	}
 	
 	protected abstract void startRobot();
+	protected abstract void stopRobot();
 }

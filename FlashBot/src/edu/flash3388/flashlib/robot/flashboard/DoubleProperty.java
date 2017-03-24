@@ -8,8 +8,9 @@ import edu.flash3388.flashlib.util.FlashUtil;
 public class DoubleProperty extends Sendable{
 	
 	private static class DoubleData implements SendableData{
-
+		private static final double CHAGNE_DIFFERENCE = 0.1;
 		double lastValue = 0.0, value = 0.0;
+		boolean changed = false;
 		DoubleDataSource src;
 		byte[] bytes = new byte[8];
 		
@@ -25,14 +26,17 @@ public class DoubleProperty extends Sendable{
 		public byte[] get() {
 			lastValue = value;
 			FlashUtil.fillByteArray(lastValue, bytes);
+			changed = false;
 			return bytes;
 		}
 		@Override
 		public boolean hasChanged() {
-			return lastValue != (value = src.get());
+			value = src.get();
+			return changed || Math.abs(value - lastValue) > CHAGNE_DIFFERENCE;
 		}
 		@Override
 		public void onConnection() {
+			changed = true;
 		}
 		@Override
 		public void onConnectionLost() {

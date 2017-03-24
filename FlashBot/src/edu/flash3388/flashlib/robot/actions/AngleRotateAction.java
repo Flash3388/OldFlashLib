@@ -6,7 +6,7 @@ import edu.flash3388.flashlib.robot.Direction;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.robot.systems.ModableMotor;
 import edu.flash3388.flashlib.robot.systems.Rotatable;
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.robot.System;
 
 public class AngleRotateAction extends Action{
@@ -64,7 +64,7 @@ public class AngleRotateAction extends Action{
 		calculatePositioning();
 		lastDir = direction;
 		misses = 0;
-		Log.log("Dest angle: "+desiredAngle);
+		FlashUtil.getLog().log("Dest angle: "+desiredAngle);
 	}
 	@Override
 	protected void execute() {
@@ -78,10 +78,10 @@ public class AngleRotateAction extends Action{
 		
 		double angularDistance = direction == Direction.Right.value ? toAngle : 360 - toAngle;
 		double rotateSpeed = speed * (angularDistance / 100.0);
-		Log.log("Speed: "+speed+" --- SpeedN: "+rotateSpeed+" \nDirection: "+direction+" CurrentAngle: "+currentAngle
+		FlashUtil.getLog().log("Speed: "+speed+" --- SpeedN: "+rotateSpeed+" \nDirection: "+direction+" CurrentAngle: "+currentAngle
 				+" To angle: "+toAngle);
 		rotateSpeed = Mathf.limit(rotateSpeed, minSpeed, maxSpeed);
-		Log.log("After speed n:"+rotateSpeed+"\n");
+		FlashUtil.getLog().log("After speed n:"+rotateSpeed+"\n");
 		
 		drive.rotate(rotateSpeed, direction);
 	}

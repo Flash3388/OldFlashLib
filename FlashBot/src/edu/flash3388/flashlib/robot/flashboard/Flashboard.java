@@ -10,7 +10,7 @@ import edu.flash3388.flashlib.communications.CommInfo;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.UDPReadInterface;
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.RemoteVision;
 
 public class Flashboard {
@@ -75,19 +75,19 @@ public class Flashboard {
 	}
 	
 	public static void init(CommInfo info){
-		if(!instance){
+		if(!instance || info == null){
 			try {
 				communications = new Communications("Flashboard", new UDPReadInterface(info.localPort), true);
+				vision = new RemoteVision();
+				camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
+				camServer = new CameraServer("Flashboard", info.camPort, camViewer);
+				communications.attach(vision);
+				
+				instance = true;
+				FlashUtil.getLog().logTime("FLASHBoard: Initialized at port " + info.localPort);
 			} catch (SocketException e) {
-				Log.reportError(e.getMessage());
+				FlashUtil.getLog().reportError(e.getMessage());
 			}
-			vision = new RemoteVision();
-			camViewer = new CameraView(null, new Camera[]{});
-			camServer = new CameraServer(info.camPort, camViewer);
-			communications.attach(vision);
-			
-			instance = true;
-			Log.logTime("FLASHBoard: Initialized at port " + info.localPort);
 		}
 	}
 	public static boolean flashboardInit(){

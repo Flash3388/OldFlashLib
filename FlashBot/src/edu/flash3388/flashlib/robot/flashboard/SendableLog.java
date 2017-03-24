@@ -4,7 +4,7 @@ import java.util.Vector;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.LoggingInterface;
 
 public class SendableLog extends Sendable{
@@ -55,7 +55,7 @@ public class SendableLog extends Sendable{
 	
 	public SendableLog() {
 		super(Type.Log);
-		Log.addLoggingInterface(new LoggingInterface(){
+		FlashUtil.getLog().addLoggingInterface(new LoggingInterface(){
 			@Override
 			public void log(String log) {
 				data.feed(log);

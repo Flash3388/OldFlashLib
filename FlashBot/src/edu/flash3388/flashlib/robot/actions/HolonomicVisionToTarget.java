@@ -2,7 +2,6 @@ package edu.flash3388.flashlib.robot.actions;
 
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
 import edu.flash3388.flashlib.robot.Action;
@@ -15,7 +14,7 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 	private HolonomicDriveSystem driveTrain;
 	private ModableMotor modable;
 	private Vision vision;
-	private boolean targetFound, centered, horizontalD, rotate;
+	private boolean targetFound, centered, horizontalD, rotate, sideways = false;
 	private int margin;
 	private double speed, lastY, lastX, currentDistance, distanceThreshold, minSpeed, distanceMargin, maxSpeed;
 	private long timeLost, timeout, centeredTimeout, passedTimeout, timepassed, timecentered;
@@ -86,8 +85,10 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 				if(!centered){
 					centered = true;
 					timecentered = millis;
-				}else if(millis - timecentered >= centeredTimeout/2)
+				}else if(millis - timecentered >= centeredTimeout/2){
+					FlashUtil.getLog().log("Centered time");
 					speedX = 0;
+				}
 			}else{
 				centered = false;
 				timecentered = -1;
@@ -113,8 +114,14 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 			speedX = lastX > 0 ? minSpeed : 0;
 			speedY = lastY > 0 ? minSpeed : 0;
 		}
-		Log.log("SpeedX: "+speedX+" SpeedY: "+speedY);
-		if(!rotate) driveTrain.holonomicCartesian(speedX, speedY, 0);
+		if(centered && millis - timecentered >= centeredTimeout/2){
+			FlashUtil.getLog().log("Centered time");
+			speedX = 0;
+		}
+		FlashUtil.getLog().log("SpeedX: "+speedX+" SpeedY: "+speedY + " sideways: "+sideways+" rotate: "+rotate+
+				" centered: "+centered);
+		if(sideways) driveTrain.holonomicCartesian(-speedY * 2, speedX, 0);
+		else if(!rotate) driveTrain.holonomicCartesian(speedX, speedY, 0);
 		else driveTrain.holonomicCartesian(0, speedY, -speedX);
 		lastX = speedX;
 		lastY = speedY;
@@ -246,5 +253,11 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 	}
 	public void setToRotate(boolean rotate){
 		this.rotate = rotate;
+	}
+	public void setSideways(boolean side){
+		sideways = side;
+	}
+	public boolean isSideways(){
+		return sideways;
 	}
 }
