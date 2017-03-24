@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.vision;
 
 import edu.flash3388.flashlib.communications.SendableData;
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.FlashUtil;
 
 public class VisionSendableData implements SendableData{
 
@@ -64,7 +64,7 @@ public class VisionSendableData implements SendableData{
 		}
 		
 		if(localParam) return null;
-		Log.log("Sending Vision parameters");
+		FlashUtil.getLog().log("Sending Vision parameters");
 		copy = param.copy();
 		return param.toBytes();
 	}
@@ -86,7 +86,7 @@ public class VisionSendableData implements SendableData{
 		if(vision.isRunning()) startRemote = true;
 		else stopRemote = true;
 		
-		Log.log("Re connection: "+localParam+" :: "+vision.isRunning());
+		FlashUtil.getLog().log("Re connection: "+localParam+" :: "+vision.isRunning());
 	}
 	@Override
 	public void onConnectionLost() {

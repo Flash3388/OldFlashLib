@@ -3,7 +3,7 @@ package edu.flash3388.flashlib.cams;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import edu.flash3388.flashlib.util.Log;
+import edu.flash3388.flashlib.util.FlashUtil;
 
 public class CameraView implements Camera{
 	private Vector<Camera> cameras = new Vector<Camera>(4);
@@ -75,7 +75,7 @@ public class CameraView implements Camera{
 		if(cameras.size() < 1) return null;
 		int index = selector != null? selector.getCameraIndex() : 0;
 		if(index < 0 || index >= cameras.size()){
-			Log.reportError("Camera selector index is out of bounds "+index);
+			FlashUtil.getLog().reportError("Camera selector index is out of bounds "+index);
 			return null;
 		}
 		if(currentIndex != index)

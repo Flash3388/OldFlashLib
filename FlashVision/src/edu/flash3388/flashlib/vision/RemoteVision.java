@@ -3,7 +3,6 @@ package edu.flash3388.flashlib.vision;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 public class RemoteVision extends Sendable implements Vision{
 
@@ -54,7 +53,7 @@ public class RemoteVision extends Sendable implements Vision{
 		enableRemoteParameters(false);
 		this.param = param;
 		data.setParam(param);
-		Log.log("Vision Prameters are set!!");
+		FlashUtil.getLog().log("Vision Prameters are set!!");
 	}
 	@Override
 	public ProcessingParam getParameters(){
@@ -83,7 +82,7 @@ public class RemoteVision extends Sendable implements Vision{
 		if(an != null) {
 			long t = FlashUtil.millis() - lastRec;
 			if(t > 1000)
-				Log.log("New analysis: "+t);
+				FlashUtil.getLog().log("New analysis: "+t);
 			lastRec = FlashUtil.millis();
 			analysis = an;
 			newAnalysis = true;
