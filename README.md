@@ -40,6 +40,7 @@ The library consists of 5 main parts, each with different dependencies and usage
    - Camera display
    - Built in image processing (Requires openCV)
    - Built in SSH and SFTP clients (Requires SSJ)
+   - Located in a different repository: https://gitlab.com/FLASH3388/FLASHboard
 
 The library is still a work in progress and the repository is not user-friendly, as work progress this will change.
 We plan to move the reporitory to GitHub, were it will be properly organized.
