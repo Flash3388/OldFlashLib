@@ -7,7 +7,6 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import edu.flash3388.flashlib.util.FlashUtil;
-import edu.flash3388.flashlib.util.Log;
 
 public class UdpServer {
 
@@ -47,11 +46,11 @@ public class UdpServer {
 					Client client = eClients.nextElement();
 					if(FlashUtil.millis() - client.lastRead >= Communications.CONNECTION_TIMEOUT){
 						client.readTimeouts++;
-						Log.logTime(client.name+"- TIMEOUT " + client.readTimeouts);
+						FlashUtil.getLog().logTime(client.name+"- TIMEOUT " + client.readTimeouts);
 						client.lastRead = FlashUtil.millis();
 					}
 					if(client.readTimeouts >= 3){
-						Log.logTime(client.name+"- Client disconnected");
+						FlashUtil.getLog().logTime(client.name+"- Client disconnected");
 						client.connected = false;
 						client.onDisconnect();
 						continue;
@@ -152,7 +151,7 @@ public class UdpServer {
 		readTask = new ReadTask(this);
 		sendThread = new Thread(sendTask, name+"-UdpServer-Send");
 		readThread = new Thread(readTask, name+"-UdpServer-Read");
-		Log.logTime(logName+": Initialized");
+		FlashUtil.getLog().logTime(logName+": Initialized");
 		
 		readInterface.setMaxBufferSize(Communications.MAX_REC_LENGTH);
 		readInterface.open();

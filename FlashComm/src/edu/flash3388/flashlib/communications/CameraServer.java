@@ -27,38 +27,60 @@ public class CameraServer {
 				server.sendAddress = packet.getAddress();
 				server.sendPort = packet.getPort();
 				
-				byte[] checkBytes = FlashUtil.toByteArray(1);
-				long period = (long) (1000 / (1.0 * 30)), lastCheck = System.currentTimeMillis();
+				FlashUtil.getLog().log("Client Connected: "+server.sendAddress.getHostAddress()+
+						":"+server.sendPort, server.logName);
+				
+				byte[] checkBytes = HANDSHAKE;
+				long cmillis = FlashUtil.millis();
+				long period = (server.camera == null || server.camera.getFPS() <= 5? DEFAULT_PERIOD : 
+					1000 / server.camera.getFPS()), 
+						lastCheck = cmillis;
+				server.lastCalVal = cmillis;
 				while(!server.stop){
-					long t0 = System.currentTimeMillis();
+					long t0 = cmillis;
 					
 					if(server.camera == null) continue;
 					byte[] imageArray = server.camera.getData();
 					if(imageArray == null) continue;
 			        
 			        server.socket.send(new DatagramPacket(imageArray, imageArray.length, server.sendAddress, server.sendPort));
+			        server.bytesSent += imageArray.length;
 			        
-			        long dt = System.currentTimeMillis() - t0;
+			        cmillis = FlashUtil.millis();
+			        long dt = cmillis - t0;
 
 		            if (dt < period)
 		            	FlashUtil.delay(dt);
 		            
-		            if(System.currentTimeMillis() - lastCheck > 2000){
-		            	server.socket.send(new DatagramPacket(checkBytes, 4, server.sendAddress, server.sendPort));
+		            cmillis = FlashUtil.millis();
+		            if(cmillis - lastCheck > CHECK_PERIOD){
+		            	server.socket.send(new DatagramPacket(checkBytes, checkBytes.length, server.sendAddress, server.sendPort));
 				       
+		            	int port = server.sendPort;
+		            	String address = server.sendAddress.getHostAddress();
 				        packet = new DatagramPacket(bytes, bytes.length);
 						server.socket.receive(packet);
 						server.sendAddress = packet.getAddress();
 						server.sendPort = packet.getPort();
-				        
-		            	lastCheck = System.currentTimeMillis();
+						
+						String naddress = server.sendAddress.getHostAddress();
+						if(port != server.sendPort || !address.equals(naddress))
+							FlashUtil.getLog().log("Client Connected: "+naddress+":"+
+									server.sendPort, server.logName);
+						
+		            	lastCheck = cmillis;
 		            }
+		            cmillis = FlashUtil.millis();
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				FlashUtil.getLog().reportError(e.getMessage());
 			}
 		}
 	}
+	
+	private static final long CHECK_PERIOD = 3000;
+	private static final long DEFAULT_PERIOD = (long) (1000 / 30.0);
+	private static final byte[] HANDSHAKE = {0x01, 0x00, 0x01};
 	
 	private Thread runThread;
 	private DatagramSocket socket;
@@ -66,7 +88,9 @@ public class CameraServer {
 	private InetAddress sendAddress;
 	private int sendPort;
 	private int port;
-	private String name;
+	private String name, logName;
+	private long bytesSent = 0;
+	private long lastCalVal = 0;
 	
 	private Camera camera;
 	private boolean stop = false;
@@ -74,6 +98,7 @@ public class CameraServer {
 	public CameraServer(String name, int localPort, Camera camera){
 		port = localPort;
 		this.name = name;
+		logName = name+"-CameraServer";
 		try {
 			socket = new DatagramSocket(new InetSocketAddress(localPort));
 		} catch (SocketException e) {
@@ -96,11 +121,22 @@ public class CameraServer {
 	public int getRemotePort(){
 		return sendPort;
 	}
+	public InetAddress getRemoteAddress(){
+		return sendAddress;
+	}
 	public Camera getCamera(){
 		return camera;
 	}
 	public void stop(){
 		stop = true;
 		socket.close();
+	}
+	public double getBandwidthUsage(){
+		long cMillis = FlashUtil.millis();
+		double secs = (cMillis - lastCalVal) / 1000.0;
+		double mbytes = bytesSent * 8 / 1e6;
+		bytesSent = 0;
+		lastCalVal = cMillis;
+		return mbytes / secs;
 	}
 }

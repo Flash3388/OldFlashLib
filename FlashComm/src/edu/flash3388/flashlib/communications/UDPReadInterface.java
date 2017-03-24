@@ -8,15 +8,18 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import edu.flash3388.flashlib.util.FlashUtil;
+
 public class UDPReadInterface implements ReadInterface{
 
 	private DatagramSocket socket;
-	private int portOut;
+	private int portOut = -1;
 	private InetAddress outInet;
 	private boolean closed = false;
 	private int maxBufferSize = 50;
 	private byte[] data = new byte[maxBufferSize];
 	private boolean server = false;
+	private long bytesRead = 0, readStart = -1;
 	
 	public UDPReadInterface(CommInfo info) throws SocketException, UnknownHostException{
 		outInet = InetAddress.getByName(info.hostname);
@@ -53,11 +56,13 @@ public class UDPReadInterface implements ReadInterface{
 	@Override
 	public boolean read(Packet packet) {
 		if(!isOpened()) return false;
+		if(readStart < 0)
+			readStart = FlashUtil.millis();
 		try {
 			DatagramPacket recp = new DatagramPacket(data, maxBufferSize);
 			socket.receive(recp);
 			
-			if(server){
+			if(server && portOut < 0 && outInet == null){
 				outInet = recp.getAddress();
 				portOut = recp.getPort();
 			}
@@ -66,6 +71,7 @@ public class UDPReadInterface implements ReadInterface{
 			packet.senderPort = portOut;
 			packet.data = recp.getData();
 			packet.length = recp.getLength();
+			bytesRead += packet.length;
 			return true;
 		} catch (IOException e) {
 			packet.length = 0;
@@ -96,8 +102,11 @@ public class UDPReadInterface implements ReadInterface{
 	}
 	public void write(byte[] data, InetAddress outInet, int portOut){
 		if(!isOpened()) return;
+		if(readStart < 0)
+			readStart = FlashUtil.millis();
 		try {
 			socket.send(new DatagramPacket(data, data.length, outInet, portOut));
+			bytesRead += data.length;
 		} catch (IOException e) {}
 	}
 
@@ -118,7 +127,27 @@ public class UDPReadInterface implements ReadInterface{
 	public boolean boundAsServer(){
 		return server;
 	}
-	public void setRemoteInetAddress(InetAddress d){
-		outInet = d;
+	public int getLocalPort(){
+		return socket.getLocalPort();
+	}
+	public int getRemotePort(){
+		return portOut;
+	}
+	public InetAddress getRemoteAddress(){
+		return outInet;
+	}
+	public double getBandwithUsage(){
+		if(readStart < 0) return 0;
+		double secs = (FlashUtil.millis() - readStart) / 1000;
+		double mbytes = bytesRead * 8 / 1e6;
+		readStart = -1;
+		bytesRead = 0;
+		return (mbytes / secs);
+	}
+	public long getBytesPassed(){
+		return bytesRead;
+	}
+	public long getMillisSinceReset(){
+		return FlashUtil.millis() - readStart;
 	}
 }
