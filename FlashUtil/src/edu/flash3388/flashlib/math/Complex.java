@@ -38,7 +38,7 @@ public class Complex {
 		Complex[] roots = new Complex[degree];
 		double l = Mathf.root(length(), degree), angle = angle();
 		for(int i = 0; i < degree; i++)
-			roots[i] = fromEuler(l, (angle + 2 * Math.PI * i) / degree);
+			roots[i] = euler(l, (angle + 2 * Math.PI * i) / degree);
 		return roots;
 	}
 	
@@ -97,7 +97,7 @@ public class Complex {
 		return str;
 	}
 	
-	public static Complex fromEuler(double length, double anglerad){
+	public static Complex euler(double length, double anglerad){
 		return new Complex(length * Math.cos(anglerad), length * Math.sin(anglerad));
 	}
 }

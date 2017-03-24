@@ -107,7 +107,7 @@ public class Mathf {
 	 * @return
 	 */
 	public static double pythagorasTheorem(double a, double b, double c){
-		return  Math.sqrt((a * a) + (b * b) + (c * c));
+		return Math.sqrt((a * a) + (b * b) + (c * c));
 	}
 	/**
 	 * Gets the result of Pythagorases theorem for a given set of numbers.
@@ -238,11 +238,21 @@ public class Mathf {
 	public static Complex divideByComplex(double n, Complex z){
 		return new Complex(0, n).divide(z.multiply(I));
 	}
+	public static Complex[] discreteFourierTransform(double... samples){
+		Function func = (x)->{return samples[(int)x];};
+		return discreteFourierTransform(func, samples.length);
+	}
+	public static Complex[] discreteFourierTransform(Function func, int samples){
+		Complex[] results = new Complex[samples];
+		for(int i = 0; i < samples; i++)
+			results[i] = discreteFourierTransform(func, (i + 1), samples);
+		return results;
+	}
 	public static Complex discreteFourierTransform(Function func, int k, int samples){
 		Complex result = new Complex();
 		double v = 2 * Math.PI * k / samples;
 		for(int i = 0; i < samples; i++)
-			result.add(Complex.fromEuler(func.f(i), v * i));
+			result.add(Complex.euler(func.f(i), v * i));
 		return result;
 	}
 	
@@ -332,7 +342,7 @@ public class Mathf {
 				mat[i][j] *= -1;
 		}
 	}
-	public static double[][] reveresedMatrix(double[][] mat){
+	public static double[][] reversedMatrix(double[][] mat){
 		double[][] mat2 = new double[mat.length][mat[0].length];
 		for(int i = 0; i < mat.length; i++){
 			for(int j = 0; j < mat[0].length; j++)
@@ -341,7 +351,8 @@ public class Mathf {
 		return mat2;
 	}
 	public static double[][] rotatePoint(double[][] pointAsMat, double[][] rotationMat, double[][] translationMat){
-		return multiplyMat(rotationMat, translationMat, pointAsMat, reveresedMatrix(translationMat));
+		double[][] res = multiplyMat(rotationMat, translationMat, pointAsMat);
+		return multiplyMat(res, reversedMatrix(translationMat), pointAsMat);
 	}
 	
 	//--------------------------------------------------------------------
@@ -391,7 +402,7 @@ public class Mathf {
 	}
 	public static double trapezoidalRule(Function func, double min, double max, int trapezoids){
 		double h = (max - min) / trapezoids;
-		double s = 0.5f * (func.f(min) + func.f(max));
+		double s = 0.5 * (func.f(min) + func.f(max));
 		for(int i = 1; i < trapezoids; i++)
 			s += func.f(min + i * h); 
 		return (s * h);

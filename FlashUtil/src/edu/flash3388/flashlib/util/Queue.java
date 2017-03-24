@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.util;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Iterator;
 
 @SuppressWarnings("unchecked")
@@ -17,6 +18,17 @@ public class Queue<T> implements java.util.Queue<T>{
 	}
 	public Queue(){
 		this(10);
+	}
+	
+	public void fill(T[] elements){
+		if(elements.length >= this.elements.length)
+			expend(5 + elements.length);
+		if(nextIndex > elements.length){
+			for (int i = elements.length; i < nextIndex; i++)
+				this.elements[i] = null;
+		}
+		System.arraycopy(elements, 0, this.elements, 0, elements.length);
+		nextIndex = elements.length;
 	}
 	
 	public int size(){
@@ -61,7 +73,10 @@ public class Queue<T> implements java.util.Queue<T>{
 	}
 	private void checkSize(){
 		if(size() < capacity()) return;
-		Object[] newarr = new Object[capacity() + 10];
+		expend(10);
+	}
+	private void expend(int size){
+		Object[] newarr = new Object[capacity() + size];
 		System.arraycopy(elements, 0, newarr, 0, capacity());
 		elements = newarr;
 	}
@@ -84,16 +99,17 @@ public class Queue<T> implements java.util.Queue<T>{
 		return Arrays.copyOfRange(elements, 0, size());
 	}
 	
-	@SuppressWarnings("hiding")
 	@Override
-	public <T> T[] toArray(T[] a) {
-		T[] ret = null;
-		if(a != null && a.length >= size()){
-			ret = a;
-			System.arraycopy(elements, 0, ret, 0, size());
-		}else
-			ret = (T[]) Arrays.copyOf(elements, size());
-		return ret;
+	public <E> E[] toArray(E[] a) {
+		if (a.length < nextIndex)
+            return (E[]) Arrays.copyOf(elements, nextIndex, a.getClass());
+
+        System.arraycopy(elements, 0, a, 0, nextIndex);
+
+        if (a.length > nextIndex)
+            a[nextIndex] = null;
+
+        return a;
 	}
 	@Override
 	public boolean remove(Object o) {
@@ -150,5 +166,28 @@ public class Queue<T> implements java.util.Queue<T>{
 	@Override
 	public T element() {
 		return peek();
+	}
+	
+	public Enumeration<T> elements(){
+		T[] ele;
+		synchronized (elements) {
+			ele = (T[]) new Object[size()];
+			System.arraycopy(elements, 0, ele, 0, size());
+		}
+		return new Enumeration<T>(){
+			private T[] elem = ele;
+			private int index = 0;
+			
+			@Override
+			public boolean hasMoreElements() {
+				return index < elem.length;
+			}
+			@Override
+			public T nextElement() {
+				if(index >= elem.length)
+					return null;
+				return elem[index++];
+			}
+		};
 	}
 }

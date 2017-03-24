@@ -38,13 +38,13 @@ public class Vector3 {
 		return new Vector3(x / l, y / l, z / l);
 	}
 	
-	public double x(){
+	public double getX(){
 		return x;
 	}
-	public double y(){
+	public double getY(){
 		return y;
 	}
-	public double z(){
+	public double getZ(){
 		return z;
 	}
 	public void setX(double x){
@@ -136,5 +136,11 @@ public class Vector3 {
 	}
 	public static double angleBetween(Vector3 u, Vector3 v){
 		return Math.acos(u.dot(v) / (u.length() + v.length())) * Mathf.TO_DEGREES;
+	}
+	public static Vector3 polar(double magnitude, double azimuth, double inclination){
+		double x = magnitude * Math.sin(inclination * Mathf.TO_RADIANS) * Math.cos(azimuth * Mathf.TO_RADIANS);
+		double y = magnitude * Math.sin(inclination * Mathf.TO_RADIANS) * Math.sin(azimuth * Mathf.TO_RADIANS);
+		double z = magnitude * Math.cos(inclination * Mathf.TO_RADIANS);
+		return new Vector3(x, y, z);
 	}
 }
