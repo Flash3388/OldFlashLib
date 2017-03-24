@@ -32,7 +32,7 @@ The library consists of 5 main parts, each with different dependencies and usage
     - Built in drive trains and generic systems
     - Interfacing with FLASHBoard
     - Compatible with the FRC RoboRIO platform (Requires WPILib)
-    - Compatible with the Raspberry PI and BeagleBone Black platform (Requires Bulldog)
+    - Compatible with the Raspberry PI and BeagleBone Black platforms (Requires Bulldog)
     
 - FLASHBoard: A custom driver's dashboard
    - Requires FLASHUtil, FLASHComm, FLASHVision
