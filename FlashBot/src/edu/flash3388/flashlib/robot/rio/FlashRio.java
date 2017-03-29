@@ -168,6 +168,9 @@ public abstract class FlashRio extends SampleRobot {
 	protected void setVoltageDropWarning(double volts){
 		warningVoltage = volts;
 	}
+	protected Log getPowerLog(){
+		return powerLog;
+	}
 	
 	protected abstract void initRobot();
 	protected abstract void teleopInit();
