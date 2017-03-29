@@ -27,7 +27,7 @@ public class Log{
 	
 	private Queue<String> logLines, errorLines;
 	private File logFile, errorFile;
-	private boolean closed = true;
+	private boolean closed = true, disable = true;
 	
 	public Log(String directory, String name, boolean override){
 		this.name = name;
@@ -116,6 +116,12 @@ public class Log{
 	public boolean isClosed(){
 		return closed;
 	}
+	public void disable(boolean disable){
+		this.disable = disable;
+	}
+	public boolean isDisabled(){
+		return disable;
+	}
 	
 	public void addLoggingInterface(LoggingInterface in){
 		loggingInterfaces.addElement(in);
@@ -151,6 +157,7 @@ public class Log{
 		log(msg, caller.getName());
 	}
 	public void log(String msg, String caller){
+		if(disable) return;
 		msg = caller+": "+msg;
 		write(msg);
 		System.out.println(name + "> " + msg);
@@ -158,6 +165,7 @@ public class Log{
 			lEnum.nextElement().log(msg);
 	}
 	public void logTime(String msg, double time){
+		if(disable) return;
 		msg = time + " : ---------->" + msg;
 		write(msg);
 		System.out.println(name + "> " + msg);
