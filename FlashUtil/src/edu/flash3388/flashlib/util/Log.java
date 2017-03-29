@@ -17,6 +17,11 @@ import edu.flash3388.flashlib.io.FileStream;
  */
 public class Log{
 	
+	public static final int MODE_WRITE = 0x01;
+	public static final int MODE_PRINT = 0x02;
+	public static final int MODE_INTERFACES = 0x03;
+	public static final int MODE_FULL = MODE_WRITE | MODE_PRINT | MODE_INTERFACES;
+	
 	private static final String EXTENSION = ".flog";
 	private static final String ERROR_EXTENSION = ".elog";
 	private static String parentDirectory = "";
@@ -28,9 +33,11 @@ public class Log{
 	private Queue<String> logLines, errorLines;
 	private File logFile, errorFile;
 	private boolean closed = true, disable = true;
+	private int logMode;
 	
-	public Log(String directory, String name, boolean override){
+	public Log(String directory, String name, boolean override, int logMode){
 		this.name = name;
+		this.logMode = logMode;
 		Date date = new Date();
 		DateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
 		directory += name + "/" + "log_" + dateFormat.format(date) + "/";
@@ -46,7 +53,8 @@ public class Log{
 		logLines = new Queue<String>(100);
 		errorLines = new Queue<String>(100);
 		try {
-			System.out.println(name+"> Log file: "+logFile.getAbsolutePath());
+			if((logMode & MODE_PRINT) != 0)
+				System.out.println(name+"> Log file: "+logFile.getAbsolutePath());
 			if(!logFile.exists())
 				logFile.createNewFile();
 			dateFormat = new SimpleDateFormat("hh:mm:ss");
@@ -60,8 +68,11 @@ public class Log{
 			e.printStackTrace();
 		}
 	}
+	public Log(String name, boolean override, int logMode){
+		this(parentDirectory+"logs/", name, override, logMode);
+	}
 	public Log(String name, boolean override){
-		this(parentDirectory+"logs/", name, override);
+		this(parentDirectory+"logs/", name, override, MODE_FULL);
 	}
 	public Log(String name){
 		this(name, false);
@@ -100,7 +111,7 @@ public class Log{
 		errorFile.delete();
 	}
 	public void save(){
-		if(isClosed()) return;
+		if(isClosed() || isDisabled()) return;
 		String[] lines = logLines.toArray(new String[0]);
 		logLines.clear();
 		
@@ -122,6 +133,12 @@ public class Log{
 	public boolean isDisabled(){
 		return disable;
 	}
+	public void setLoggingMode(int mode){
+		this.logMode = mode;
+	}
+	public int getLoggingMode(){
+		return logMode;
+	}
 	
 	public void addLoggingInterface(LoggingInterface in){
 		loggingInterfaces.addElement(in);
@@ -130,25 +147,36 @@ public class Log{
 	public void reportError(String error){
 		String err = "ERROR\n\t" + 
 					FlashUtil.secs() + " : " + error;
-		String trace = getErrorStackTrace();
-		writeError(error, trace);
-		write(err);
-		System.err.println(name + "> " + err);
-		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-			lEnum.nextElement().reportError(error);
+		if((logMode & MODE_WRITE) != 0){
+			String trace = getErrorStackTrace();
+			writeError(error, trace);
+			write(err);
+		}
+		if((logMode & MODE_PRINT) != 0)
+			System.err.println(name + "> " + err);
+		if((logMode & MODE_INTERFACES) != 0){
+			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
+				lEnum.nextElement().reportError(error);
+		}
 	}
 	public void reportWarning(String warning){
 		String war = "WARNING\n\t" + 
 				FlashUtil.secs() + " : " + warning;
-		System.err.println(name + "> " + war);
-		writeError("WARNING - " +warning);
-		write(war);
-		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-			lEnum.nextElement().reportWarning(warning);
+		if((logMode & MODE_PRINT) != 0)
+			System.err.println(name + "> " + war);
+		if((logMode & MODE_WRITE) != 0){
+			writeError("WARNING - " +warning);
+			write(war);
+		}
+		if((logMode & MODE_INTERFACES) != 0){
+			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
+				lEnum.nextElement().reportWarning(warning);
+		}
 	}
 	public void saveLog(){
 		save();
-		System.out.println(name + "> " + FlashUtil.secs() + " : Log Saved");
+		if((logMode & MODE_PRINT) != 0)
+			System.out.println(name + "> " + FlashUtil.secs() + " : Log Saved");
 	}
 	public void log(String msg){
 		log(msg, getCallerClass());
@@ -159,18 +187,26 @@ public class Log{
 	public void log(String msg, String caller){
 		if(disable) return;
 		msg = caller+": "+msg;
-		write(msg);
-		System.out.println(name + "> " + msg);
-		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-			lEnum.nextElement().log(msg);
+		if((logMode & MODE_WRITE) != 0)
+			write(msg);
+		if((logMode & MODE_PRINT) != 0)
+			System.out.println(name + "> " + msg);
+		if((logMode & MODE_INTERFACES) != 0){
+			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
+				lEnum.nextElement().log(msg);
+		}
 	}
 	public void logTime(String msg, double time){
 		if(disable) return;
 		msg = time + " : ---------->" + msg;
-		write(msg);
-		System.out.println(name + "> " + msg);
-		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-			lEnum.nextElement().log(msg);
+		if((logMode & MODE_WRITE) != 0)
+			write(msg);
+		if((logMode & MODE_PRINT) != 0)
+			System.out.println(name + "> " + msg);
+		if((logMode & MODE_INTERFACES) != 0){
+			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
+				lEnum.nextElement().log(msg);
+		}
 	}
 	public void logTime(String msg){
 		logTime(msg, FlashUtil.secs());
