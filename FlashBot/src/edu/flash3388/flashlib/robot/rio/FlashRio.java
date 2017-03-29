@@ -15,7 +15,7 @@ public abstract class FlashRio extends SampleRobot {
 	
 	private static final double WARNING_VOLTAGE = 8.5;
 	private static final double POWER_DRAW_WARNING = 80.0;
-	private static final long ITERATION_DELAY = 10;
+	private static final long ITERATION_DELAY = 20;
 	
 	private Log log;
 	private Log powerLog;
@@ -52,7 +52,7 @@ public abstract class FlashRio extends SampleRobot {
 				
 				while(isDisabled()){
 					disabledPeriodic();
-					logLowVoltage();
+					//logLowVoltage();
 					delay(ITERATION_DELAY);
 				}
 				m_ds.InDisabled(false);
@@ -131,6 +131,7 @@ public abstract class FlashRio extends SampleRobot {
 						" >> TCurrent: "+powerDrawTotal,
 						powerLogTime());
 			}
+			m_ds.waitForData(ITERATION_DELAY);
 		}
 	}
 	
