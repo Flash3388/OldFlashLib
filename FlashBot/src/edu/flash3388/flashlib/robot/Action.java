@@ -12,9 +12,13 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public abstract class Action {
 	
-	public static final Action EMPTY = new InstantAction(){
+	public static final Action EMPTY = new Action(){
 		@Override
 		protected void execute() {}
+
+		@Override
+		protected void end() {
+		}
 	};
 	public static Action addRequirement(Action action, System sys){
 		action.requires(sys);

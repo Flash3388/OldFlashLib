@@ -5,16 +5,18 @@ import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
 import edu.flash3388.flashlib.robot.Action;
+import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.System;
+import edu.flash3388.flashlib.robot.VoltageScalable;
 import edu.flash3388.flashlib.robot.systems.ModableMotor;
 import edu.flash3388.flashlib.robot.systems.Rotatable;
 
-public class VisionRotate extends Action implements VisionAction{
+public class VisionRotate extends Action implements VisionAction, VoltageScalable{
 	
 	private Rotatable driveTrain;
 	private ModableMotor modable;
 	private Vision vision;
-	private boolean targetFound, centered, horizontal;
+	private boolean targetFound, centered, horizontal, scaleVoltage = false;
 	private double speed, lastSpeed, minSpeed, maxSpeed, baseSpeed;
 	private int lastDir, margin, lastPixels, pixelDifference, differences;
 	private long timeout, timeLost, centeredTimeout, timeCentered;
@@ -113,6 +115,8 @@ public class VisionRotate extends Action implements VisionAction{
 			rotateSpeed = 0;
 			FlashUtil.getLog().log("Predicted Stop");
 		}
+		if(scaleVoltage && rotateSpeed != 0)
+			rotateSpeed = FlashRoboUtil.scaleVoltageBus(rotateSpeed);
 		FlashUtil.getLog().log("Speed: "+rotateSpeed+" Dir: "+dir+" Differences: "+differences+" PixelsD: "+pixelDifference + " L: "+lastPixels);
 		driveTrain.rotate(rotateSpeed, dir);
 		lastDir = dir;
@@ -203,5 +207,13 @@ public class VisionRotate extends Action implements VisionAction{
 	}
 	public void setHorizontalRotate(boolean s){
 		horizontal = s;
+	}
+	@Override
+	public void enableVoltageScaling(boolean en) {
+		scaleVoltage = en;
+	}
+	@Override
+	public boolean isVoltageScaling() {
+		return scaleVoltage;
 	}
 }
