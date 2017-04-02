@@ -15,6 +15,7 @@ import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.ShellExecutor;
 import edu.flash3388.flashlib.robot.flashboard.Flashboard;
+import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
 import edu.flash3388.flashlib.util.Properties;
 import io.silverspoon.bulldog.core.io.IOPort;
@@ -73,6 +74,7 @@ public abstract class SbcBot {
 			System.loadLibrary(NATIVE_LIBRARY_NAME);
 		
 		setStart();
+		log = FlashUtil.getLog();
 		log.logTime("Initializing robot...");
 		
 		log.log("Setting up shutdown hook...");

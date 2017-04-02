@@ -3,13 +3,15 @@ package edu.flash3388.flashlib.robot.actions;
 import edu.flash3388.flashlib.math.Mathf;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.Direction;
+import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.devices.Gyro;
 import edu.flash3388.flashlib.robot.systems.ModableMotor;
 import edu.flash3388.flashlib.robot.systems.Rotatable;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.robot.System;
+import edu.flash3388.flashlib.robot.VoltageScalable;
 
-public class AngleRotateAction extends Action{
+public class AngleRotateAction extends Action implements VoltageScalable{
 	
 	public static final double ANGLE_MARGIN = 10;
 	public static final int MAX_MISSES = 5;
@@ -17,7 +19,7 @@ public class AngleRotateAction extends Action{
 	private double currentAngle, toAngle, desiredAngle, angleMargin, angleConversion, angleAddition;
 	private int direction, lastDir, misses, maxMisses;
 	private double speed, minSpeed, maxSpeed;
-	private boolean absolute;
+	private boolean absolute, scaleVoltage = false;
 	private Rotatable drive;
 	private ModableMotor modable;
 	private Gyro gyro;
@@ -81,6 +83,8 @@ public class AngleRotateAction extends Action{
 		FlashUtil.getLog().log("Speed: "+speed+" --- SpeedN: "+rotateSpeed+" \nDirection: "+direction+" CurrentAngle: "+currentAngle
 				+" To angle: "+toAngle);
 		rotateSpeed = Mathf.limit(rotateSpeed, minSpeed, maxSpeed);
+		if(scaleVoltage)
+			rotateSpeed = FlashRoboUtil.scaleVoltageBus(rotateSpeed);
 		FlashUtil.getLog().log("After speed n:"+rotateSpeed+"\n");
 		
 		drive.rotate(rotateSpeed, direction);
@@ -154,5 +158,13 @@ public class AngleRotateAction extends Action{
 	
 	public void setMotorSourceMode(ModableMotor modable){
 		this.modable = modable;
+	}
+	@Override
+	public void enableVoltageScaling(boolean en) {
+		scaleVoltage = en;
+	}
+	@Override
+	public boolean isVoltageScaling() {
+		return scaleVoltage;
 	}
 }

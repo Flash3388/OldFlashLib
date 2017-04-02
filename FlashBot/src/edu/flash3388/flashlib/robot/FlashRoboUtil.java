@@ -15,7 +15,7 @@ public class FlashRoboUtil {
 	public static final int UTIL_INIT = 0x0;
 	public static final int FLASHBOARD_INIT = 0x1 << 1;
 	public static final int SCHEDULER_INIT = 0x1 << 2;
-	public static final double DEFAULT_EXPECTED_VOLTAGE = 12.7;
+	public static final double DEFAULT_EXPECTED_VOLTAGE = 13.3;
 	
 	private static boolean init = false;
 	private static int initCode = 0;
@@ -59,7 +59,6 @@ public class FlashRoboUtil {
 		if(init) 
 			throw new IllegalStateException("FlashLib was already initialized!");
 		
-		Log.setParentDirectory("/home/lvuser");
 		FlashUtil.setStart();
 		RobotFactory.setImplementationType(implType);
 		

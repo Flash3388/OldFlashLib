@@ -12,9 +12,13 @@ import edu.flash3388.flashlib.util.FlashUtil;
  */
 public abstract class Action {
 	
-	public static final Action EMPTY = new InstantAction(){
+	public static final Action EMPTY = new Action(){
 		@Override
 		protected void execute() {}
+
+		@Override
+		protected void end() {
+		}
 	};
 	public static Action addRequirement(Action action, System sys){
 		action.requires(sys);
@@ -27,6 +31,14 @@ public abstract class Action {
 	private boolean running = false;
 	private long timeout = -1;
 	private long start_time = -1;
+	private String name;
+	
+	public Action(String name){
+		this.name = name;
+	}
+	public Action(){
+		this("");
+	}
 	
 	public void start(){
 		initialized = false;
@@ -63,6 +75,12 @@ public abstract class Action {
 		return !isFinished();
 	}
 	
+	public String getName(){
+		return name;
+	}
+	public void setName(String name){
+		this.name = name;
+	}
 	public boolean isCanceled(){
 		return canceled;
 	}
