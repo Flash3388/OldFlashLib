@@ -17,45 +17,62 @@ import edu.flash3388.flashlib.io.FileStream;
  */
 public class Log{
 	
+	public static final int MODE_WRITE = 0x01;
+	public static final int MODE_PRINT = 0x02;
+	public static final int MODE_INTERFACES = 0x03;
+	public static final int MODE_FULL = MODE_WRITE | MODE_PRINT | MODE_INTERFACES;
+	
+	private static final String EXTENSION = ".flog";
+	private static final String ERROR_EXTENSION = ".elog";
 	private static String parentDirectory = "";
 	
 	private Vector<LoggingInterface> loggingInterfaces = new Vector<LoggingInterface>(2);
 	
-	private String extension = ".flog";
-	private String directory = parentDirectory+"logs/log_";
 	private String name;
 	
 	private Queue<String> logLines, errorLines;
 	private File logFile, errorFile;
-	private boolean closed = true;
+	private boolean closed = true, disable = true;
+	private int logMode;
 	
-	public Log(String name, boolean override){
+	public Log(String directory, String name, boolean override, int logMode){
 		this.name = name;
+		this.logMode = logMode;
+		Date date = new Date();
 		DateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
-		directory += dateFormat.format(new Date()) + "/";
+		directory += name + "/" + "log_" + dateFormat.format(date) + "/";
 		File file = new File(directory);
 		if(!file.exists())
 			file.mkdirs();
 		
-		int counter = 1;
-		logFile = new File(directory + name + extension);
+		int counter = 0;
+		logFile = new File(directory + name + EXTENSION);
 		while(logFile.exists() && !override)
-			logFile = new File(directory + name + (counter++) + extension);
+			logFile = new File(directory + name + (++counter) + EXTENSION);
 		
 		logLines = new Queue<String>(100);
 		errorLines = new Queue<String>(100);
 		try {
-			System.out.println(name+"> Log file: "+logFile.getAbsolutePath());
+			if((logMode & MODE_PRINT) != 0)
+				System.out.println(name+"> Log file: "+logFile.getAbsolutePath());
 			if(!logFile.exists())
 				logFile.createNewFile();
+			dateFormat = new SimpleDateFormat("hh:mm:ss");
+			FileStream.writeLine(logFile.getAbsolutePath(), "Time: "+dateFormat.format(date));
 			
-			errorFile = new File(directory + name + counter + "_ERROR" + extension);
+			errorFile = new File(directory + name + (counter > 0? counter : "") + ERROR_EXTENSION);
 			if(!errorFile.exists())
 				errorFile.createNewFile();
 			closed = false;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	public Log(String name, boolean override, int logMode){
+		this(parentDirectory+"logs/", name, override, logMode);
+	}
+	public Log(String name, boolean override){
+		this(parentDirectory+"logs/", name, override, MODE_FULL);
 	}
 	public Log(String name){
 		this(name, false);
@@ -67,16 +84,16 @@ public class Log{
 		super.finalize();
 	}
 	
-	private void write(String mess){
+	public void write(String mess){
 		if(isClosed()) return;
 		logLines.enqueue(mess);
 	}
-	private void writeError(String mess){
+	public void writeError(String mess){
 		if(isClosed()) return;
 		mess = (FlashUtil.secs()) + ": " + mess;
 		errorLines.enqueue(mess);
 	}
-	private void writeError(String mess, String stacktrace){
+	public void writeError(String mess, String stacktrace){
 		if(isClosed()) return;
 		mess = (FlashUtil.secs()) + ": " + mess;
 		errorLines.enqueue(mess);
@@ -94,21 +111,33 @@ public class Log{
 		errorFile.delete();
 	}
 	public void save(){
-		if(isClosed()) return;
+		if(isClosed() || isDisabled()) return;
 		String[] lines = logLines.toArray(new String[0]);
 		logLines.clear();
 		
-		FileStream.writeLines(logFile.getAbsolutePath(), lines);
+		FileStream.appendLines(logFile.getAbsolutePath(), lines);
 		
 		lines = errorLines.toArray(new String[0]);
 		errorLines.clear();
 		
-		FileStream.writeLines(errorFile.getAbsolutePath(), lines);
+		FileStream.appendLines(errorFile.getAbsolutePath(), lines);
 		
 		closed = false;
 	}
 	public boolean isClosed(){
 		return closed;
+	}
+	public void disable(boolean disable){
+		this.disable = disable;
+	}
+	public boolean isDisabled(){
+		return disable;
+	}
+	public void setLoggingMode(int mode){
+		this.logMode = mode;
+	}
+	public int getLoggingMode(){
+		return logMode;
 	}
 	
 	public void addLoggingInterface(LoggingInterface in){
@@ -116,29 +145,38 @@ public class Log{
 	}
 	
 	public void reportError(String error){
-		String err = "ERROR\n" + 
-					FlashUtil.secs() + " : " + error + 
-					"\n--------------------------";
-		String trace = getErrorStackTrace();
-		writeError(error, trace);
-		write(err);
-		System.err.println(name + "> " + err);
-		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-			lEnum.nextElement().reportError(error);
+		String err = "ERROR\n\t" + 
+					FlashUtil.secs() + " : " + error;
+		if((logMode & MODE_WRITE) != 0){
+			String trace = getErrorStackTrace();
+			writeError(error, trace);
+			write(err);
+		}
+		if((logMode & MODE_PRINT) != 0)
+			System.err.println(name + "> " + err);
+		if((logMode & MODE_INTERFACES) != 0){
+			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
+				lEnum.nextElement().reportError(error);
+		}
 	}
 	public void reportWarning(String warning){
-		String war = "WARNING\n" + 
-				FlashUtil.secs() + " : " + warning + 
-				"\n--------------------------";
-		System.err.println(name + "> " + war);
-		writeError("WARNING - " +warning);
-		write(war);
-		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-			lEnum.nextElement().reportWarning(warning);
+		String war = "WARNING\n\t" + 
+				FlashUtil.secs() + " : " + warning;
+		if((logMode & MODE_PRINT) != 0)
+			System.err.println(name + "> " + war);
+		if((logMode & MODE_WRITE) != 0){
+			writeError("WARNING - " +warning);
+			write(war);
+		}
+		if((logMode & MODE_INTERFACES) != 0){
+			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
+				lEnum.nextElement().reportWarning(warning);
+		}
 	}
 	public void saveLog(){
 		save();
-		System.out.println(name + "> " + FlashUtil.secs() + " : Log Saved");
+		if((logMode & MODE_PRINT) != 0)
+			System.out.println(name + "> " + FlashUtil.secs() + " : Log Saved");
 	}
 	public void log(String msg){
 		log(msg, getCallerClass());
@@ -147,18 +185,31 @@ public class Log{
 		log(msg, caller.getName());
 	}
 	public void log(String msg, String caller){
+		if(disable) return;
 		msg = caller+": "+msg;
-		write(msg);
-		System.out.println(name + "> " + msg);
-		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-			lEnum.nextElement().log(msg);
+		if((logMode & MODE_WRITE) != 0)
+			write(msg);
+		if((logMode & MODE_PRINT) != 0)
+			System.out.println(name + "> " + msg);
+		if((logMode & MODE_INTERFACES) != 0){
+			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
+				lEnum.nextElement().log(msg);
+		}
+	}
+	public void logTime(String msg, double time){
+		if(disable) return;
+		msg = time + " : ---------->" + msg;
+		if((logMode & MODE_WRITE) != 0)
+			write(msg);
+		if((logMode & MODE_PRINT) != 0)
+			System.out.println(name + "> " + msg);
+		if((logMode & MODE_INTERFACES) != 0){
+			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
+				lEnum.nextElement().log(msg);
+		}
 	}
 	public void logTime(String msg){
-		msg = FlashUtil.secs() + " : ---------->" + msg;
-		write(msg);
-		System.out.println(name + "> " + msg);
-		for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-			lEnum.nextElement().log(msg);
+		logTime(msg, FlashUtil.secs());
 	}
 	
 	
