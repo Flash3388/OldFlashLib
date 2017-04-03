@@ -1,0 +1,16 @@
+Dashboard: Launching FX...
+Dashboard: Found host: roborio-3388-frc.local
+RoboRIO-Comm: Initialized
+RoboRIO-Comm: Searching for remote connection
+RoboRIO CAMServer-CameraClient: Running
+RoboRIO-Comm: Connected
+edu.flash3388.flashlib.vision.VisionRunner: Starting: true
+edu.flash3388.flashlib.vision.VisionRunner: Remote Parameters: true
+RoboRIO CAMServer-CameraClient: Connection Established
+Dashboard: Loading default parameters: param
+Dashboard: Loading failed
+edu.flash3388.dashboard.Dashboard: Shutting down
+edu.flash3388.dashboard.Dashboard: Stopping image processing...
+edu.flash3388.dashboard.Dashboard: Stopping camera client...
+edu.flash3388.dashboard.Dashboard: Stopping communications...
+edu.flash3388.dashboard.Dashboard: Settings saved

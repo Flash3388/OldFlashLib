@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jsch"/>
+	<classpathentry kind="var" path="flashcomm"/>
+	<classpathentry kind="var" path="flashutil"/>
+	<classpathentry kind="var" path="flashvision"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/opencv"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
