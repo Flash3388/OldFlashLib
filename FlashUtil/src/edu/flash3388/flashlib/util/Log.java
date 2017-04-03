@@ -1,6 +1,7 @@
 package edu.flash3388.flashlib.util;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -17,11 +18,20 @@ import edu.flash3388.flashlib.io.FileStream;
  */
 public class Log{
 	
-	public static final int MODE_WRITE = 0x01;
-	public static final int MODE_PRINT = 0x02;
-	public static final int MODE_INTERFACES = 0x03;
+	public static enum LoggingType{
+		Stream, Buffered
+	}
+	public static enum BufferedLogType{
+		FlushAmount, FlushTime, FlushManual
+	}
+	
+	public static final int MODE_DISABLED = 0x00;
+	public static final int MODE_WRITE = 0x01 << 2;
+	public static final int MODE_PRINT = 0x01 << 3;
+	public static final int MODE_INTERFACES = 0x01 << 4;
 	public static final int MODE_FULL = MODE_WRITE | MODE_PRINT | MODE_INTERFACES;
 	
+	private static final int BUFFER_SIZE = 50;
 	private static final String EXTENSION = ".flog";
 	private static final String ERROR_EXTENSION = ".elog";
 	private static String parentDirectory = "";
@@ -30,14 +40,17 @@ public class Log{
 	
 	private String name;
 	
-	private Queue<String> logLines, errorLines;
+	private FileWriter writerLog, writerErrorLog;
+	private String[] logLines, errorLines;
 	private File logFile, errorFile;
-	private boolean closed = true, disable = true;
-	private int logMode;
+	private boolean closed = true;
+	private int logMode, indexLog, indexErrorLog;
+	private LoggingType type;
 	
-	public Log(String directory, String name, boolean override, int logMode){
+	public Log(String directory, String name, LoggingType type, boolean override, int logMode){
 		this.name = name;
 		this.logMode = logMode;
+		this.type = type;
 		Date date = new Date();
 		DateFormat dateFormat = new SimpleDateFormat("dd_MM_yyyy");
 		directory += name + "/" + "log_" + dateFormat.format(date) + "/";
@@ -50,8 +63,6 @@ public class Log{
 		while(logFile.exists() && !override)
 			logFile = new File(directory + name + (++counter) + EXTENSION);
 		
-		logLines = new Queue<String>(100);
-		errorLines = new Queue<String>(100);
 		try {
 			if((logMode & MODE_PRINT) != 0)
 				System.out.println(name+"> Log file: "+logFile.getAbsolutePath());
@@ -63,75 +74,127 @@ public class Log{
 			errorFile = new File(directory + name + (counter > 0? counter : "") + ERROR_EXTENSION);
 			if(!errorFile.exists())
 				errorFile.createNewFile();
+			
+			if(type == LoggingType.Buffered){
+				logLines = new String[BUFFER_SIZE];
+				errorLines = new String[BUFFER_SIZE];
+			}else{
+				writerLog = new FileWriter(logFile);
+				writerErrorLog = new FileWriter(errorFile);
+			}
+			
 			closed = false;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	public Log(String name, boolean override, int logMode){
-		this(parentDirectory+"logs/", name, override, logMode);
+	public Log(String name, LoggingType type, boolean override, int logMode){
+		this(parentDirectory+"logs/", name, type, override, logMode);
 	}
-	public Log(String name, boolean override){
-		this(parentDirectory+"logs/", name, override, MODE_FULL);
+	public Log(String name, LoggingType type, boolean override){
+		this(parentDirectory+"logs/", name, type, override, MODE_FULL);
 	}
 	public Log(String name){
-		this(name, false);
+		this(name, LoggingType.Stream, false);
 	}
 	
-	@Override
-	protected void finalize() throws Throwable{
-		close();
-		super.finalize();
+	private synchronized void flushLogFile(){
+		if(indexLog == 0) return;
+		FileStream.appendLines(logFile.getAbsolutePath(), logLines);
+		indexLog = 0;
+	}
+	private synchronized void flushErrorLogFile(){
+		if(indexErrorLog == 0) return;
+		FileStream.appendLines(errorFile.getAbsolutePath(), errorLines);
+		indexErrorLog = 0;
 	}
 	
-	public void write(String mess){
+	public synchronized void write(String mess){
 		if(isClosed()) return;
-		logLines.enqueue(mess);
+		if(type == LoggingType.Buffered){
+			if(indexLog >= BUFFER_SIZE)
+				flushLogFile();
+			logLines[indexLog++] = mess;
+		}else{
+			try {
+				writerLog.write(mess);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
-	public void writeError(String mess){
+	public synchronized void writeError(String mess){
 		if(isClosed()) return;
 		mess = (FlashUtil.secs()) + ": " + mess;
-		errorLines.enqueue(mess);
+		if(type == LoggingType.Buffered){
+			if(indexErrorLog >= BUFFER_SIZE)
+				flushErrorLogFile();
+			errorLines[indexErrorLog++] = mess;
+		}else{
+			try {
+				writerErrorLog.write(mess);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
-	public void writeError(String mess, String stacktrace){
+	public synchronized void writeError(String mess, String stacktrace){
 		if(isClosed()) return;
 		mess = (FlashUtil.secs()) + ": " + mess;
-		errorLines.enqueue(mess);
-		errorLines.enqueue(stacktrace);
+		if(type == LoggingType.Buffered){
+			if(indexErrorLog >= BUFFER_SIZE)
+				flushErrorLogFile();
+			errorLines[indexErrorLog++] = mess;
+		}else{
+			try {
+				writerErrorLog.write(mess);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
-	public void close(){
+	public synchronized void close(){
 		if(isClosed()) return;
 		save();
 		closed = true;
 	}
-	public void delete(){
+	public synchronized void delete(){
 		if(!isClosed())
 			close();
 		logFile.delete();
 		errorFile.delete();
 	}
-	public void save(){
+	public synchronized void save(){
 		if(isClosed() || isDisabled()) return;
-		String[] lines = logLines.toArray(new String[0]);
-		logLines.clear();
 		
-		FileStream.appendLines(logFile.getAbsolutePath(), lines);
-		
-		lines = errorLines.toArray(new String[0]);
-		errorLines.clear();
-		
-		FileStream.appendLines(errorFile.getAbsolutePath(), lines);
+		if(type == LoggingType.Buffered){
+			flushLogFile();
+			flushErrorLogFile();
+		}else{
+			try {
+				writerLog.flush();
+				writerErrorLog.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		
 		closed = false;
+		if((logMode & MODE_PRINT) != 0)
+			System.out.println(name + "> " + FlashUtil.secs() + " : Log Saved");
+	}
+	
+	public LoggingType getLoggingType(){
+		return type;
 	}
 	public boolean isClosed(){
-		return closed;
+		return closed || (type == LoggingType.Stream && (writerLog == null || writerErrorLog == null));
 	}
-	public void disable(boolean disable){
-		this.disable = disable;
+	public void disable(){
+		setLoggingMode(MODE_DISABLED);
 	}
 	public boolean isDisabled(){
-		return disable;
+		return logMode == MODE_DISABLED;
 	}
 	public void setLoggingMode(int mode){
 		this.logMode = mode;
@@ -145,6 +208,7 @@ public class Log{
 	}
 	
 	public void reportError(String error){
+		if(isDisabled()) return;
 		String err = "ERROR\n\t" + 
 					FlashUtil.secs() + " : " + error;
 		if((logMode & MODE_WRITE) != 0){
@@ -160,6 +224,7 @@ public class Log{
 		}
 	}
 	public void reportWarning(String warning){
+		if(isDisabled()) return;
 		String war = "WARNING\n\t" + 
 				FlashUtil.secs() + " : " + warning;
 		if((logMode & MODE_PRINT) != 0)
@@ -173,11 +238,6 @@ public class Log{
 				lEnum.nextElement().reportWarning(warning);
 		}
 	}
-	public void saveLog(){
-		save();
-		if((logMode & MODE_PRINT) != 0)
-			System.out.println(name + "> " + FlashUtil.secs() + " : Log Saved");
-	}
 	public void log(String msg){
 		log(msg, getCallerClass());
 	}
@@ -185,20 +245,8 @@ public class Log{
 		log(msg, caller.getName());
 	}
 	public void log(String msg, String caller){
-		if(disable) return;
+		if(isDisabled()) return;
 		msg = caller+": "+msg;
-		if((logMode & MODE_WRITE) != 0)
-			write(msg);
-		if((logMode & MODE_PRINT) != 0)
-			System.out.println(name + "> " + msg);
-		if((logMode & MODE_INTERFACES) != 0){
-			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
-				lEnum.nextElement().log(msg);
-		}
-	}
-	public void logTime(String msg, double time){
-		if(disable) return;
-		msg = time + " : ---------->" + msg;
 		if((logMode & MODE_WRITE) != 0)
 			write(msg);
 		if((logMode & MODE_PRINT) != 0)
@@ -211,7 +259,18 @@ public class Log{
 	public void logTime(String msg){
 		logTime(msg, FlashUtil.secs());
 	}
-	
+	public void logTime(String msg, double time){
+		if(isDisabled()) return;
+		msg = time + " : ---------->" + msg;
+		if((logMode & MODE_WRITE) != 0)
+			write(msg);
+		if((logMode & MODE_PRINT) != 0)
+			System.out.println(name + "> " + msg);
+		if((logMode & MODE_INTERFACES) != 0){
+			for(Enumeration<LoggingInterface> lEnum = loggingInterfaces.elements(); lEnum.hasMoreElements();)
+				lEnum.nextElement().log(msg);
+		}
+	}
 	
 	private static String getCallerClass(){
 		StackTraceElement[] traces = Thread.currentThread().getStackTrace();
