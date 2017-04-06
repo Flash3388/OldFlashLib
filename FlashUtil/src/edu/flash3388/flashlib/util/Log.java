@@ -42,6 +42,7 @@ public class Log{
 	
 	private FileWriter writerLog, writerErrorLog;
 	private String[] logLines, errorLines;
+	private String absPath, absPathError;
 	private File logFile, errorFile;
 	private boolean closed = true;
 	private int logMode, indexLog, indexErrorLog;
@@ -68,19 +69,29 @@ public class Log{
 				System.out.println(name+"> Log file: "+logFile.getAbsolutePath());
 			if(!logFile.exists())
 				logFile.createNewFile();
-			dateFormat = new SimpleDateFormat("hh:mm:ss");
-			FileStream.writeLine(logFile.getAbsolutePath(), "Time: "+dateFormat.format(date));
 			
 			errorFile = new File(directory + name + (counter > 0? counter : "") + ERROR_EXTENSION);
 			if(!errorFile.exists())
 				errorFile.createNewFile();
 			
+			dateFormat = new SimpleDateFormat("hh:mm:ss");
+			String timestr = "Time: "+dateFormat.format(date);
+			
 			if(type == LoggingType.Buffered){
 				logLines = new String[BUFFER_SIZE];
 				errorLines = new String[BUFFER_SIZE];
+				
+				absPath = logFile.getAbsolutePath();
+				absPathError = errorFile.getAbsolutePath();
+				FileStream.writeLine(absPath, timestr);
+				FileStream.writeLine(absPathError, timestr);
 			}else{
 				writerLog = new FileWriter(logFile);
 				writerErrorLog = new FileWriter(errorFile);
+				
+				timestr += "\n";
+				writerLog.write(timestr);
+				writerErrorLog.write(timestr);
 			}
 			
 			closed = false;
@@ -100,12 +111,12 @@ public class Log{
 	
 	private synchronized void flushLogFile(){
 		if(indexLog == 0) return;
-		FileStream.appendLines(logFile.getAbsolutePath(), logLines);
+		FileStream.appendLines(absPath, logLines);
 		indexLog = 0;
 	}
 	private synchronized void flushErrorLogFile(){
 		if(indexErrorLog == 0) return;
-		FileStream.appendLines(errorFile.getAbsolutePath(), errorLines);
+		FileStream.appendLines(absPathError, errorLines);
 		indexErrorLog = 0;
 	}
 	
@@ -117,7 +128,7 @@ public class Log{
 			logLines[indexLog++] = mess;
 		}else{
 			try {
-				writerLog.write(mess);
+				writerLog.write(mess+"\n");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -132,7 +143,7 @@ public class Log{
 			errorLines[indexErrorLog++] = mess;
 		}else{
 			try {
-				writerErrorLog.write(mess);
+				writerErrorLog.write(mess+"\n");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -142,12 +153,14 @@ public class Log{
 		if(isClosed()) return;
 		mess = (FlashUtil.secs()) + ": " + mess;
 		if(type == LoggingType.Buffered){
-			if(indexErrorLog >= BUFFER_SIZE)
+			if(indexErrorLog + 1 >= BUFFER_SIZE)
 				flushErrorLogFile();
 			errorLines[indexErrorLog++] = mess;
+			errorLines[indexErrorLog++] = stacktrace;
 		}else{
 			try {
-				writerErrorLog.write(mess);
+				writerErrorLog.write(mess+"\n");
+				writerErrorLog.write(stacktrace);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
