@@ -20,10 +20,6 @@ public abstract class Action {
 		protected void end() {
 		}
 	};
-	public static Action addRequirement(Action action, System sys){
-		action.requires(sys);
-		return action;
-	}
 
 	private Vector<System> requirements = new Vector<System>(2);
 	private boolean initialized = false;
@@ -40,6 +36,18 @@ public abstract class Action {
 		this("");
 	}
 	
+	public Action addRequirement(System sys){
+		requires(sys);
+		return this;
+	}
+	public Action setTimeout(double sec){
+		return setTimeout((long)(sec * 1000));
+	}
+	public Action setTimeout(long millis){
+		setTimeOut(millis);
+		return this;
+	}
+	
 	public void start(){
 		initialized = false;
 		canceled = false;
@@ -50,7 +58,7 @@ public abstract class Action {
 		if(running)
 			canceled = true;
 	}
-	public void removed(){
+	void removed(){
 		if(initialized){
 			if(canceled)
 				interrupted();
@@ -61,7 +69,7 @@ public abstract class Action {
 		running = false;
 		start_time = -1;
 	}
-	protected boolean run(){
+	boolean run(){
 		if((RobotState.isRobotDisabled() && removeOnDisabled()) || isTimedOut())
 			cancel();
 		if(canceled)
