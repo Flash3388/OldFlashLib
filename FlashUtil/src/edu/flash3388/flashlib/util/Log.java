@@ -21,8 +21,29 @@ public class Log{
 	public static enum LoggingType{
 		Stream, Buffered
 	}
-	public static enum BufferedLogType{
-		FlushAmount, FlushTime, FlushManual
+	
+	private static class TimedFlush implements Runnable{
+		private long flushTimeout = -1, lastFlush = -1;
+		private Log log;
+		
+		public TimedFlush(Log log, long timeout){
+			this.log = log;
+			flushTimeout = timeout;
+		}
+		public TimedFlush(Log log){
+			this(log, -1);
+		}
+		
+		@Override
+		public void run() {
+			long millis = FlashUtil.millis();
+			if(lastFlush <= 0)
+				lastFlush = millis;
+			if(flushTimeout > 0 && millis - lastFlush >= flushTimeout){
+				log.save();
+				lastFlush = millis;
+			}
+		}
 	}
 	
 	public static final int MODE_DISABLED = 0x00;

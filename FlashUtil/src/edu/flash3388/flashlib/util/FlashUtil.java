@@ -31,9 +31,12 @@ public class FlashUtil {
 		if(startTime == 0)
 			startTime = time;
 	}
-	public static void setStart(){
+	public static void setStart(Log.LoggingType logType, boolean overrideLog){
 		setStartTime(System.currentTimeMillis());
-		mainLog = new Log("flashlib");
+		mainLog = new Log("flashlib", logType, overrideLog);
+	}
+	public static void setStart(){
+		setStart(Log.LoggingType.Stream, false);
 	}
 	public static Log getLog(){
 		return mainLog;
