@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.actions;
 
-import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
@@ -93,7 +93,7 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 				centered = false;
 				timecentered = -1;
 				speedX = speed * (Math.abs(offset) / 100.0);
-				speedX = Mathf.limit(speedX, minSpeed, maxSpeed);
+				speedX = Mathd.limit(speedX, minSpeed, maxSpeed);
 				speedX *= offset < 0? 1 : -1;
 			}
 			if(inDistanceThreshold()){
@@ -104,7 +104,7 @@ public class HolonomicVisionToTarget extends Action implements VisionAction{
 			}else{
 				double offsetD = distanceThreshold - currentDistance;
 				speedY = speed * Math.abs(offsetD) / 100.0;
-				speedX = Mathf.limit(speedY, minSpeed, maxSpeed);
+				speedX = Mathd.limit(speedY, minSpeed, maxSpeed);
 				speedY *= offsetD < 0? 1 : -1;
 			}
 		}else{

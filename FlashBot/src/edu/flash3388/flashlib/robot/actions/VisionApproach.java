@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.actions;
 
-import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.Analysis;
@@ -78,7 +78,7 @@ public class VisionApproach extends Action implements VisionAction{
 				double offset = distanceThreshold - currentDistance;
 				moveSpeed = speed;
 				dir = offset < 0? 1 : -1;
-				moveSpeed = Mathf.limit(moveSpeed, minSpeed, maxSpeed);
+				moveSpeed = Mathd.limit(moveSpeed, minSpeed, maxSpeed);
 			}
 		}else{
 			if(targetFound)

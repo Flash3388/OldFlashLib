@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.actions;
 
-import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.Analysis;
 import edu.flash3388.flashlib.vision.Vision;
@@ -91,7 +91,7 @@ public class VisionRotate extends Action implements VisionAction, VoltageScalabl
 				centered = false;
 				timeCentered = -1;
 				rotateSpeed = speed * (offset / 100.0);
-				rotateSpeed = Mathf.limit(rotateSpeed, minSpeed, maxSpeed);
+				rotateSpeed = Mathd.limit(rotateSpeed, minSpeed, maxSpeed);
 			}
 			
 			if(lastPixels >= 0){

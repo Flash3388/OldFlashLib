@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.actions;
 
-import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.Direction;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
@@ -56,7 +56,7 @@ public class AngleRotateAction extends Action implements VoltageScalable{
 			angleAddition = 360;
 		}
 		else {
-			angleConversion = Mathf.limitAngle(gyro.getAngle());
+			angleConversion = Mathd.limitAngle(gyro.getAngle());
 			angleAddition = 0;
 		}
 		
@@ -82,7 +82,7 @@ public class AngleRotateAction extends Action implements VoltageScalable{
 		double rotateSpeed = speed * (angularDistance / 100.0);
 		FlashUtil.getLog().log("Speed: "+speed+" --- SpeedN: "+rotateSpeed+" \nDirection: "+direction+" CurrentAngle: "+currentAngle
 				+" To angle: "+toAngle);
-		rotateSpeed = Mathf.limit(rotateSpeed, minSpeed, maxSpeed);
+		rotateSpeed = Mathd.limit(rotateSpeed, minSpeed, maxSpeed);
 		if(scaleVoltage)
 			rotateSpeed = FlashRoboUtil.scaleVoltageBus(rotateSpeed);
 		FlashUtil.getLog().log("After speed n:"+rotateSpeed+"\n");
@@ -105,8 +105,8 @@ public class AngleRotateAction extends Action implements VoltageScalable{
 			modable.enableBrakeMode(false);
 	}
 	private void calculatePositioning(){
-		currentAngle = Mathf.limitAngle(gyro.getAngle() - angleConversion);
-		toAngle = Mathf.limitAngle(desiredAngle - currentAngle + angleAddition);
+		currentAngle = Mathd.limitAngle(gyro.getAngle() - angleConversion);
+		toAngle = Mathd.limitAngle(desiredAngle - currentAngle + angleAddition);
 		direction = (toAngle <= 180)? Direction.Right.value : Direction.Left.value;
 	}
 	

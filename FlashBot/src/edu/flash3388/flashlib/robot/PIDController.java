@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
@@ -77,7 +77,7 @@ public class PIDController {
 		
 		if(source.getPIDSourceType().equals(PIDSourceType.kRate)){
 			double pGain = (totalError + error) * kp;
-			if(Mathf.limited(pGain, minimumOutput, maximumOutput))
+			if(Mathd.limited(pGain, minimumOutput, maximumOutput))
 				totalError += error;
 			else if(pGain < maximumOutput)
 				totalError = minimumOutput / kp;
@@ -87,7 +87,7 @@ public class PIDController {
 			result = kp * totalError + kd * error;
 		}else{//DISPLACEMENT!
 			double iGain = (totalError + error) * ki;
-			if(Mathf.limited(iGain, minimumOutput, maximumOutput))
+			if(Mathd.limited(iGain, minimumOutput, maximumOutput))
 				totalError += error;
 			else if(iGain < maximumOutput)
 				totalError = minimumOutput / ki;
@@ -98,7 +98,7 @@ public class PIDController {
 		}
 		
 		preError = error;
-		result = Mathf.limit(result, minimumOutput, maximumOutput);
+		result = Mathd.limit(result, minimumOutput, maximumOutput);
 		return result;
 	}
 	
@@ -154,16 +154,16 @@ public class PIDController {
 	}
 	public void setMaximumOutput(double m){
 		this.maximumOutput = m;
-		this.setPoint = Mathf.limit(setPoint, minimumOutput, maximumOutput);
+		this.setPoint = Mathd.limit(setPoint, minimumOutput, maximumOutput);
 	}
 	public void setMinimumOutput(double m){
 		this.minimumOutput = m;
-		this.setPoint = Mathf.limit(setPoint, minimumOutput, maximumOutput);
+		this.setPoint = Mathd.limit(setPoint, minimumOutput, maximumOutput);
 	}
 	public void setOutputLimit(double l){
 		this.maximumOutput = l;
 		this.minimumOutput = -l;
-		this.setPoint = Mathf.limit(setPoint, minimumOutput, maximumOutput);
+		this.setPoint = Mathd.limit(setPoint, minimumOutput, maximumOutput);
 	}
 	public void setPeriod(double seconds){
 		this.period = seconds;
@@ -192,7 +192,7 @@ public class PIDController {
 		this.kd = d;
 	}
 	public void setSetPoint(double setpoint){
-		this.setPoint = Mathf.limit(setpoint, minimumOutput, maximumOutput);
+		this.setPoint = Mathd.limit(setpoint, minimumOutput, maximumOutput);
 	}
 	public void setPIDSource(PIDSource source){
 		this.source = source;

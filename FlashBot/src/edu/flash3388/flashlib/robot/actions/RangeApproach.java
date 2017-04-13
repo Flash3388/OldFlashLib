@@ -1,6 +1,6 @@
 package edu.flash3388.flashlib.robot.actions;
 
-import edu.flash3388.flashlib.math.Mathf;
+import edu.flash3388.flashlib.math.Mathd;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.System;
@@ -65,7 +65,7 @@ public class RangeApproach extends Action implements VoltageScalable{
 			double offset = distanceThreshold - currentDistance;
 			dir = offset < 0? 1 : -1;
 			moveSpeed = speed * Math.abs(offset) / 100.0;
-			moveSpeed = Mathf.limit(moveSpeed, minSpeed, maxSpeed);
+			moveSpeed = Mathd.limit(moveSpeed, minSpeed, maxSpeed);
 		}
 		if(isVoltageScaling() && moveSpeed != 0)
 			moveSpeed = FlashRoboUtil.scaleVoltageBus(moveSpeed);
