@@ -22,7 +22,7 @@ public class Complex {
 		return imaginary;
 	}
 	public double length(){
-		return Mathf.pythagorasTheorem(real, imaginary);
+		return Mathd.pythagorasTheorem(real, imaginary);
 	}
 	public double angle(){
 		return Math.atan2(imaginary, real);
@@ -36,7 +36,7 @@ public class Complex {
 	}
 	public Complex[] roots(int degree){
 		Complex[] roots = new Complex[degree];
-		double l = Mathf.root(length(), degree), angle = angle();
+		double l = Mathd.root(length(), degree), angle = angle();
 		for(int i = 0; i < degree; i++)
 			roots[i] = euler(l, (angle + 2 * Math.PI * i) / degree);
 		return roots;

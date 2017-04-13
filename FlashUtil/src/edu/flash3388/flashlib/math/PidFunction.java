@@ -1,5 +1,7 @@
 package edu.flash3388.flashlib.math;
 
+import edu.flash3388.flashlib.math.Mathd.Function;
+
 public class PidFunction implements Function{
 
 	private static class ErrorFunction implements Function{
@@ -68,7 +70,7 @@ public class PidFunction implements Function{
 	
 	@Override
 	public double f(double x) {
-		return kp * errorFunction.f(x) + ki * Mathf.integrate(errorFunction, 0, x) + 
-				kd * Mathf.derive(errorFunction, x);
+		return kp * errorFunction.f(x) + ki * Mathd.integrate(errorFunction, 0, x) + 
+				kd * Mathd.derive(errorFunction, x);
 	}
 }

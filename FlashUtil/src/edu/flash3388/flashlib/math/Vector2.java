@@ -119,11 +119,11 @@ public class Vector2 {
 		return new Vector2(x, y);
 	}
 	public static double angleBetween(Vector2 u, Vector2 v){
-		return Math.acos(u.dot(v) / (u.length() + v.length())) * Mathf.TO_DEGREES;
+		return Math.toDegrees(Math.acos(u.dot(v) / (u.length() + v.length())));
 	}
 	public static Vector2 polar(double magnitude, double azimuth){
-		double x = magnitude * Math.cos(azimuth * Mathf.TO_RADIANS);
-		double y = magnitude * Math.sin(azimuth * Mathf.TO_RADIANS);
+		double x = Mathd.getX(magnitude, azimuth);
+		double y = Mathd.getY(magnitude, azimuth);
 		return new Vector2(x, y);
 	}
 }

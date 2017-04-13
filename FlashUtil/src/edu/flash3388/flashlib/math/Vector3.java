@@ -135,12 +135,12 @@ public class Vector3 {
 		return new Vector3(x, y, z);
 	}
 	public static double angleBetween(Vector3 u, Vector3 v){
-		return Math.acos(u.dot(v) / (u.length() + v.length())) * Mathf.TO_DEGREES;
+		return Math.toDegrees(Math.acos(u.dot(v) / (u.length() + v.length())));
 	}
 	public static Vector3 polar(double magnitude, double azimuth, double inclination){
-		double x = magnitude * Math.sin(inclination * Mathf.TO_RADIANS) * Math.cos(azimuth * Mathf.TO_RADIANS);
-		double y = magnitude * Math.sin(inclination * Mathf.TO_RADIANS) * Math.sin(azimuth * Mathf.TO_RADIANS);
-		double z = magnitude * Math.cos(inclination * Mathf.TO_RADIANS);
+		double x = Mathd.getX(magnitude, azimuth, inclination);
+		double y = Mathd.getY(magnitude, azimuth, inclination);
+		double z = Mathd.getZ(magnitude, inclination);
 		return new Vector3(x, y, z);
 	}
 }

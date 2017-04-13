@@ -46,13 +46,13 @@ public class Log{
 		}
 	}
 	
-	public static final int MODE_DISABLED = 0x00;
-	public static final int MODE_WRITE = 0x01 << 2;
-	public static final int MODE_PRINT = 0x01 << 3;
-	public static final int MODE_INTERFACES = 0x01 << 4;
-	public static final int MODE_FULL = MODE_WRITE | MODE_PRINT | MODE_INTERFACES;
+	public static final byte MODE_DISABLED = 0x00;
+	public static final byte MODE_WRITE = 0x01 << 2;
+	public static final byte MODE_PRINT = 0x01 << 3;
+	public static final byte MODE_INTERFACES = 0x01 << 4;
+	public static final byte MODE_FULL = MODE_WRITE | MODE_PRINT | MODE_INTERFACES;
 	
-	private static final int BUFFER_SIZE = 50;
+	private static final byte BUFFER_SIZE = 50;
 	private static final String EXTENSION = ".flog";
 	private static final String ERROR_EXTENSION = ".elog";
 	private static String parentDirectory = "";
@@ -64,12 +64,11 @@ public class Log{
 	private FileWriter writerLog, writerErrorLog;
 	private String[] logLines, errorLines;
 	private String absPath, absPathError;
-	private File logFile, errorFile;
 	private boolean closed = true;
-	private int logMode, indexLog, indexErrorLog;
+	private byte logMode, indexLog, indexErrorLog;
 	private LoggingType type;
 	
-	public Log(String directory, String name, LoggingType type, boolean override, int logMode){
+	public Log(String directory, String name, LoggingType type, boolean override, byte logMode){
 		this.name = name;
 		this.logMode = logMode;
 		this.type = type;
@@ -80,8 +79,8 @@ public class Log{
 		if(!file.exists())
 			file.mkdirs();
 		
-		int counter = 0;
-		logFile = new File(directory + name + EXTENSION);
+		byte counter = 0;
+		File logFile = new File(directory + name + EXTENSION);
 		while(logFile.exists() && !override)
 			logFile = new File(directory + name + (++counter) + EXTENSION);
 		
@@ -91,19 +90,19 @@ public class Log{
 			if(!logFile.exists())
 				logFile.createNewFile();
 			
-			errorFile = new File(directory + name + (counter > 0? counter : "") + ERROR_EXTENSION);
+			File errorFile = new File(directory + name + (counter > 0? counter : "") + ERROR_EXTENSION);
 			if(!errorFile.exists())
 				errorFile.createNewFile();
 			
 			dateFormat = new SimpleDateFormat("hh:mm:ss");
 			String timestr = "Time: "+dateFormat.format(date);
+			absPath = logFile.getAbsolutePath();
+			absPathError = errorFile.getAbsolutePath();
 			
 			if(type == LoggingType.Buffered){
 				logLines = new String[BUFFER_SIZE];
 				errorLines = new String[BUFFER_SIZE];
 				
-				absPath = logFile.getAbsolutePath();
-				absPathError = errorFile.getAbsolutePath();
 				FileStream.writeLine(absPath, timestr);
 				FileStream.writeLine(absPathError, timestr);
 			}else{
@@ -120,7 +119,7 @@ public class Log{
 			e.printStackTrace();
 		}
 	}
-	public Log(String name, LoggingType type, boolean override, int logMode){
+	public Log(String name, LoggingType type, boolean override, byte logMode){
 		this(parentDirectory+"logs/", name, type, override, logMode);
 	}
 	public Log(String name, LoggingType type, boolean override){
@@ -195,8 +194,8 @@ public class Log{
 	public synchronized void delete(){
 		if(!isClosed())
 			close();
-		logFile.delete();
-		errorFile.delete();
+		new File(absPath).delete();
+		new File(absPathError).delete();
 	}
 	public synchronized void save(){
 		if(isClosed() || isDisabled()) return;
@@ -230,10 +229,10 @@ public class Log{
 	public boolean isDisabled(){
 		return logMode == MODE_DISABLED;
 	}
-	public void setLoggingMode(int mode){
+	public void setLoggingMode(byte mode){
 		this.logMode = mode;
 	}
-	public int getLoggingMode(){
+	public byte getLoggingMode(){
 		return logMode;
 	}
 	
@@ -315,7 +314,7 @@ public class Log{
 	private static String getErrorStackTrace(){
 		StackTraceElement[] traces = Thread.currentThread().getStackTrace();
 		String trace = "";
-		for(int i = 3; i < traces.length; i++)
+		for(byte i = 3; i < traces.length; i++)
 			trace += "\t"+traces[i].toString()+"\n";
 		return trace;
 	}
