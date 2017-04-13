@@ -44,8 +44,8 @@ public abstract class FlashRio extends SampleRobot {
 				log.logTime("NEW STATE - DISABLED");
 				powerLog.logTime("New State: Disabled >> Voltage: "+m_ds.getBatteryVoltage(),
 						powerLogTime());
-				log.saveLog();
-				powerLog.saveLog();
+				log.save();
+				powerLog.save();
 				powerDrawState = 0;
 				disableScheduler(true);
 				m_ds.InDisabled(true);
@@ -66,8 +66,8 @@ public abstract class FlashRio extends SampleRobot {
 				log.logTime("NEW STATE - AUTONOMOUS");
 				powerLog.logTime("New State: Autonomous >> Voltage: "+m_ds.getBatteryVoltage(),
 						powerLogTime());
-				log.saveLog();
-				powerLog.saveLog();
+				log.save();
+				powerLog.save();
 				powerDrawState = 0;
 				disableScheduler(false);
 				m_ds.InAutonomous(true);
@@ -89,8 +89,8 @@ public abstract class FlashRio extends SampleRobot {
 				log.logTime("NEW STATE - TEST");
 				powerLog.logTime("New State: Test >> Voltage: "+m_ds.getBatteryVoltage(),
 						powerLogTime());
-				log.saveLog();
-				powerLog.saveLog();
+				log.save();
+				powerLog.save();
 				powerDrawState = 0;
 				disableScheduler(false);
 				m_ds.InTest(true);
@@ -112,8 +112,8 @@ public abstract class FlashRio extends SampleRobot {
 				log.logTime("NEW STATE - TELEOP");
 				powerLog.logTime("New State: Teleop >> Voltage: "+m_ds.getBatteryVoltage(),
 						powerLogTime());
-				log.saveLog();
-				powerLog.saveLog();
+				log.save();
+				powerLog.save();
 				powerDrawState = 0;
 				disableScheduler(false);
 				m_ds.InOperatorControl(true);
@@ -166,8 +166,8 @@ public abstract class FlashRio extends SampleRobot {
 	protected void setPowerLogging(boolean log) {
 		logPower = log;
 		if(!log)
-			powerLog.disable(true);
-		else powerLog.disable(false);
+			powerLog.setLoggingMode(Log.MODE_DISABLED);
+		else powerLog.setLoggingMode(Log.MODE_FULL);
 	}
 	protected void setPowerDrawWarning(double current){
 		warningPowerDraw = current;

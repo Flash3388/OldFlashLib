@@ -14,7 +14,7 @@ public abstract class IterativeSbc extends SbcBot{
 		while (!stop) {
 			SbcState state = currentState();
 			if(lastObsState == null || state.value != lastObsState.value){
-				FlashUtil.getLog().saveLog();
+				FlashUtil.getLog().save();
 				FlashUtil.getLog().logTime("NEW STATE - "+state.toString());
 				lastObsState = state;
 				if(state.value == SbcState.DISABLED)

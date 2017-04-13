@@ -1,7 +1,7 @@
 package edu.flash3388.flashlib.robot.devices;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import com.ctre.CANTalon;
@@ -36,6 +36,7 @@ public class RioControllers implements FlashSpeedController{
 	public RioControllers(int front, int back, ControllerType t){
 		this(controllerFromType(t, front), controllerFromType(t, back));
 	}
+	
 	/**
 	 * Creates an instance of the Controllers class. The instance is created for two motor controllers.
 	 * 
@@ -79,10 +80,17 @@ public class RioControllers implements FlashSpeedController{
 		this(Arrays.asList(front, middle, back));
 	}
 	
-	public RioControllers(SpeedController[] controllers) {
+	public RioControllers(SpeedController...controllers) {
 		this(Arrays.asList(controllers));
 	}
 	
+	public RioControllers(ControllerType t, int...controllers){
+		motor_controllers = new ArrayList<SpeedController>(controllers.length);
+		for (int i = 0; i < controllers.length; i++)
+			motor_controllers.add(controllerFromType(t, controllers[i]));
+		enableBrakeMode(false);
+		setInverted(false);
+	}
 	/**
 	 * Creates an instance of the Controllers class. The instance is created for an unlimited amount of
 	 * motor controllers.

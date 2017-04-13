@@ -61,7 +61,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 		}
 		
 		protected void drive(){
-			drive.omniDrive(stick.getY(), stick.getX());
+			drive.omniDrive(stick);
 		}
 	}
 	
@@ -74,7 +74,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 		}
 		
 		protected void drive(){
-			drive.tankDrive(stick_r.getY(), stick_l.getY());
+			drive.tankDrive(stick_r, stick_l);
 		}
 	}
 	
@@ -86,7 +86,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 		}
 		
 		protected void drive(){
-			drive.arcadeDrive(stick.getY(), stick.getX());
+			drive.arcadeDrive(stick);
 		}
 	}
 	
@@ -789,7 +789,8 @@ public class FlashDrive extends System implements TankDriveSystem{
 		interface_action = new InterfaceAction(this, controlInterface);
 	}
 	public void setDefaultInterface(DriveControlInterface controlInterface){
-		setDefaultAction(new InterfaceAction(this, controlInterface));
+		setControlInterface(controlInterface);
+		setDefaultAction(interface_action);
 	}
 	
 	@Override
@@ -802,14 +803,20 @@ public class FlashDrive extends System implements TankDriveSystem{
 
 	@Override
 	public void enableBrakeMode(boolean mode) {
-		front_controllers.enableBrakeMode(mode);
-		left_controllers.enableBrakeMode(mode);
-		right_controllers.enableBrakeMode(mode);
-		rear_controllers.enableBrakeMode(mode);
+		if(front_controllers != null)
+			front_controllers.enableBrakeMode(mode);
+		if(left_controllers != null)
+			left_controllers.enableBrakeMode(mode);
+		if(right_controllers != null)
+			right_controllers.enableBrakeMode(mode);
+		if(rear_controllers != null)
+			rear_controllers.enableBrakeMode(mode);
 	}
 	@Override
 	public boolean inBrakeMode() {
-		return front_controllers.inBrakeMode() && left_controllers.inBrakeMode() &&
-				right_controllers.inBrakeMode() && rear_controllers.inBrakeMode();
+		return (front_controllers == null || front_controllers.inBrakeMode()) && 
+				(left_controllers == null || left_controllers.inBrakeMode()) &&
+				(right_controllers == null || right_controllers.inBrakeMode()) && 
+				(rear_controllers == null || rear_controllers.inBrakeMode());
 	}
 }

@@ -120,7 +120,7 @@ public abstract class SbcBot {
 		log.log("Done");
 		
 		log.logTime("Initialization Done");
-		log.saveLog();
+		log.save();
 		
 		log.log("Loading user class...");
 		SbcBot userClass = null;
@@ -201,7 +201,7 @@ public abstract class SbcBot {
 		log.logTime("Shutdown successful");
 		boolean shutdown = properties.getBooleanProperty(PROPERTIES_FILE);
 		log.log("Board shutdown="+shutdown);
-		log.saveLog();
+		log.save();
 		log.close();
 		if(shutdown){
 			try {
