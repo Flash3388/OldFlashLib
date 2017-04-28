@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.robot.hid;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
+import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.ScheduledTask;
 import edu.flash3388.flashlib.robot.flashboard.HIDSendableData;
@@ -86,7 +87,7 @@ public class XboxController extends Sendable implements HID, ScheduledTask{
 		this(channel, "XBox "+ channel);
 	}
 	public XboxController(int channel, String name){
-		super(name, Type.Joystick);
+		super(name, FlashboardSendableType.JOYSTICK);
 		this.channel = channel;
 		
 		LeftStick = RobotFactory.createStick(channel, 0, 1);

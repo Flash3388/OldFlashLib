@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
+import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class DashboardChooser<T> extends Sendable{
@@ -74,7 +75,7 @@ public class DashboardChooser<T> extends Sendable{
 	
 	@SafeVarargs
 	public DashboardChooser(String name, Option<T>...options) {
-		super(name, Type.Chooser);
+		super(name, FlashboardSendableType.CHOOSER);
 		
 		if(options != null){
 			for(Option<T> o : options)

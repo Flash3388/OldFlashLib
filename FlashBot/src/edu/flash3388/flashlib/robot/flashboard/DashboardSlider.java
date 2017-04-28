@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.robot.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
+import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class DashboardSlider extends Sendable{
@@ -38,7 +39,7 @@ public class DashboardSlider extends Sendable{
 	private SliderSendableData data = new SliderSendableData();
 	
 	public DashboardSlider(String name, double min, double max, int ticks) {
-		super(name, Type.String);
+		super(name, FlashboardSendableType.SLIDER);
 		data.slider = this;
 		this.ticks = ticks;
 		this.max = max;

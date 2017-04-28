@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.robot.hid;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
+import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.robot.RobotFactory;
 import edu.flash3388.flashlib.robot.ScheduledTask;
 import edu.flash3388.flashlib.robot.flashboard.HIDSendableData;
@@ -23,7 +24,7 @@ public class Joystick extends Sendable implements HID, ScheduledTask{
 	private HIDSendableData data;
 	
 	public Joystick(String name, int stick, int buttonCount){
-		super(name, Type.Joystick);
+		super(name, FlashboardSendableType.JOYSTICK);
 		stick_num = stick;
 		
 		this.stick = RobotFactory.createStick(stick, X, Y);

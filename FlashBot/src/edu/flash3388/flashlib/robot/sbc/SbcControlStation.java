@@ -66,7 +66,7 @@ public final class SbcControlStation extends Sendable{
 	private Thread csThread;
 	
 	SbcControlStation() {
-		super("CS-"+SbcBot.getBoardName(), Type.Activatable);
+		super("CS-"+SbcBot.getBoardName(), (byte)0x0);
 		
 		for (int i = 0; i < controllerButtons.length; i++)
 			controllerButtons[i] = new ControllerButtons();

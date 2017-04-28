@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.robot.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
+import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.robot.devices.BooleanDataSource;
 
 public class BooleanProperty extends Sendable{
@@ -43,7 +44,7 @@ public class BooleanProperty extends Sendable{
 	private BooleanData data;
 	
 	public BooleanProperty(String name, BooleanDataSource data) {
-		super(name, Type.Boolean);
+		super(name, FlashboardSendableType.BOOLEAN);
 		this.data = new BooleanData(data);
 	}
 	public BooleanProperty(String name){

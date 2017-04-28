@@ -189,7 +189,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 
 	public MecanumDrive(FlashSpeedController right_front, FlashSpeedController right_back, FlashSpeedController left_front,
 			FlashSpeedController left_back) {
-		super("", null);
+		super(null);
 		front_right = right_front;
 		rear_right = right_back;
 		front_left = left_front;

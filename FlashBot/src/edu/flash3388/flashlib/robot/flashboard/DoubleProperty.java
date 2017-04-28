@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.robot.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
+import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.robot.devices.DoubleDataSource;
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -46,7 +47,7 @@ public class DoubleProperty extends Sendable{
 	private DoubleData data;
 	
 	public DoubleProperty(String name, DoubleDataSource data) {
-		super(name, Type.Double);
+		super(name, FlashboardSendableType.DOUBLE);
 		this.data = new DoubleData(data);
 	}
 	public DoubleProperty(String name){

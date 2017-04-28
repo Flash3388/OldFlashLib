@@ -40,7 +40,7 @@ public class SingleMotorSystem extends System implements XAxisMovable, YAxisMova
 		this(controller, null);
 	}
 	public SingleMotorSystem(FlashSpeedController controller, Action defaultAction){
-		super("", null);
+		super(null);
 		this.controller = controller;
 		setDefaultAction(defaultAction);
 	}

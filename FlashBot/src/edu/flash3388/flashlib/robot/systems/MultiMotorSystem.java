@@ -1,5 +1,6 @@
 package edu.flash3388.flashlib.robot.systems;
 
+import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.robot.SystemAction;
 import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
@@ -37,7 +38,7 @@ public class MultiMotorSystem extends System implements YAxisMovable, XAxisMovab
 		this(controllers, null);
 	}
 	public MultiMotorSystem(FlashSpeedController controllers, Action defaultAction){
-		super("", null);
+		super(null);
 		this.controllers = controllers;
 		
 		if(defaultAction != null) 

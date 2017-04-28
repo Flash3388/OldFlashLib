@@ -5,6 +5,7 @@ import java.util.Vector;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
+import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.robot.Action;
 import edu.flash3388.flashlib.util.FlashUtil;
 
@@ -34,7 +35,7 @@ public class DashboardButton extends Sendable{
 	private ButtonData data = new ButtonData();
 	
 	public DashboardButton(String name) {
-		super(name, Type.Activatable);
+		super(name, FlashboardSendableType.ACTIVATABLE);
 	}
 
 	public void whenPressed(Action action){

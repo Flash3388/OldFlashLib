@@ -207,7 +207,7 @@ public class FlashDrive extends System implements TankDriveSystem{
 	 * @throws IllegalArgumentException If all parameters are null.
 	 */
 	public FlashDrive(FlashSpeedController right, FlashSpeedController left, FlashSpeedController front, FlashSpeedController back){
-		super("", null);
+		super(null);
 		if(right == null && left == null && front == null && back == null) 
 			throw new IllegalArgumentException("At least one side must have wheels");
 		

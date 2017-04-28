@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.robot.flashboard;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
+import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class DashboardInput extends Sendable{
@@ -9,7 +10,7 @@ public class DashboardInput extends Sendable{
 	private String value;
 	
 	public DashboardInput(String name) {
-		super(name, Type.String);
+		super(name, FlashboardSendableType.STRING);
 		value = "";
 	}
 

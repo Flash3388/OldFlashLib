@@ -6,6 +6,7 @@ import com.ctre.CANTalon;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
+import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.robot.devices.RioControllers;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.wpi.first.wpilibj.Jaguar;
@@ -28,7 +29,7 @@ public class Tester extends Sendable{
 		private boolean send = false;
 		
 		public Motor(SpeedController con){
-			super("Tester-Motor", Type.Motor);
+			super("Tester-Motor", FlashboardSendableType.MOTOR);
 			controller = con;
 			if(con instanceof CANTalon){
 				canTalonController = (CANTalon)con;
@@ -171,7 +172,7 @@ public class Tester extends Sendable{
 	private boolean send = false;
 	
 	private Tester(){
-		super("Tester", Type.Tester);
+		super("Tester", FlashboardSendableType.TESTER);
 		data.tester = this;
 	}
 	

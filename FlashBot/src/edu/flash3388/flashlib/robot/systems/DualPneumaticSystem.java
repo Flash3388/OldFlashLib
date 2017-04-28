@@ -69,7 +69,7 @@ public class DualPneumaticSystem extends System {
 		this(forward_1, forward_2, backward_1, backward_2, null);
 	}
 	public DualPneumaticSystem(int forward_1, int backward_1, int forward_2, int backward_2, Action defaultAction){
-		super("", null);
+		super(null);
 		solenoid_1 = new DoubleSolenoid(forward_1, backward_1);
 		solenoid_2 = new DoubleSolenoid(forward_2, backward_2);
 		

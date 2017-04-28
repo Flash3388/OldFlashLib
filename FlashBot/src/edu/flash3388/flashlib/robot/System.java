@@ -3,13 +3,12 @@ package edu.flash3388.flashlib.robot;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
 
-public abstract class System extends Sendable{
+public abstract class System{
 	
 	private Action default_action;
 	private Action current_action;
 	
-	protected System(String name, Type t){
-		super(name, t);
+	protected System(String name){
 		Scheduler.getInstance().registerSystem(this);
 	}
 	
@@ -34,10 +33,6 @@ public abstract class System extends Sendable{
 		default_action = action;
 	}
 	
-	@Override
-	public void newData(byte[] bytes){}
-	@Override
-	public SendableData dataForTransmition(){return null;}
 	
 	protected abstract void initDefaultAction();
 

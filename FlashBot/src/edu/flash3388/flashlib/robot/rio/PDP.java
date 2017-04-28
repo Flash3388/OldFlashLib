@@ -2,6 +2,7 @@ package edu.flash3388.flashlib.robot.rio;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
+import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
@@ -79,7 +80,7 @@ public class PDP extends Sendable{
 	private double voltage = 0;
 	
 	public PDP(int module){
-		super("PDP", Type.Pdp);
+		super("PDP", FlashboardSendableType.PDP);
 		pdp = new PowerDistributionPanel(module);
 		data.pdp = this;
 		
