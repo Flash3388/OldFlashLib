@@ -115,7 +115,7 @@ public abstract class SbcBot {
 			log.reportError(e.getMessage());
 			shutdown(1);
 		}
-		communications = new Communications("Robot", inter, true);
+		communications = new Communications("Robot", inter);
 		communications.attach(executor);
 		log.log("Done");
 		

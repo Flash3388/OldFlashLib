@@ -166,7 +166,7 @@ public abstract class FlashRio extends SampleRobot {
 	protected void setPowerLogging(boolean log) {
 		logPower = log;
 		if(!log)
-			powerLog.setLoggingMode(Log.MODE_DISABLED);
+			powerLog.disable();
 		else powerLog.setLoggingMode(Log.MODE_FULL);
 	}
 	protected void setPowerDrawWarning(double current){

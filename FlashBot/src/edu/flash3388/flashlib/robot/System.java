@@ -1,15 +1,22 @@
 package edu.flash3388.flashlib.robot;
 
-import edu.flash3388.flashlib.communications.Sendable;
-import edu.flash3388.flashlib.communications.SendableData;
-
 public abstract class System{
 	
 	private Action default_action;
 	private Action current_action;
 	
+	private String name = null;
+	
 	protected System(String name){
 		Scheduler.getInstance().registerSystem(this);
+		this.name = name;
+	}
+	
+	public void setName(String name){
+		this.name = name;
+	}
+	public String getName(){
+		return name;
 	}
 	
 	public void cancelCurrentAction(){

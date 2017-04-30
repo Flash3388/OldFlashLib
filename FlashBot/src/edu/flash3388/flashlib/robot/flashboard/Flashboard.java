@@ -77,7 +77,7 @@ public class Flashboard {
 	public static void init(CommInfo info){
 		if(!instance || info == null){
 			try {
-				communications = new Communications("Flashboard", new UDPReadInterface(info.localPort), true);
+				communications = new Communications("Flashboard", new UDPReadInterface(info.localPort));
 				vision = new RemoteVision();
 				camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
 				camServer = new CameraServer("Flashboard", info.camPort, camViewer);
