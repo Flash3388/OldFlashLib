@@ -5,15 +5,14 @@ import static edu.flash3388.flashlib.robot.Scheduler.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.SocketException;
 
 import edu.flash3388.flashlib.communications.CommInfo;
 import edu.flash3388.flashlib.communications.Communications;
 import edu.flash3388.flashlib.communications.ReadInterface;
+import edu.flash3388.flashlib.communications.TCPReadInterface;
 import edu.flash3388.flashlib.communications.UDPReadInterface;
 import edu.flash3388.flashlib.robot.FlashRoboUtil;
 import edu.flash3388.flashlib.robot.RobotFactory;
-import edu.flash3388.flashlib.robot.ShellExecutor;
 import edu.flash3388.flashlib.robot.flashboard.Flashboard;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.util.Log;
@@ -31,15 +30,15 @@ import static edu.flash3388.flashlib.robot.FlashRoboUtil.*;
 public abstract class SbcBot {
 	
 	public static enum SbcState{
-		Disabled((byte)0x01), Enabled((byte)0x02);
+		Disabled((byte)0x00), Enabled((byte)0x01);
 		
 		public final byte value;
 		SbcState(byte value){
 			this.value = value;
 		}
 		
-		public static final byte DISABLED = 0x01;
-		public static final byte ENABLED = 0x02;
+		public static final byte DISABLED = 0x00;
+		public static final byte ENABLED = 0x01;
 		
 		public static SbcState byValue(byte val){
 			switch (val) {
@@ -60,6 +59,7 @@ public abstract class SbcBot {
 	private static final String PROPERTIES_FILE = "robot.ini";
 	
 	private static Board board;
+	private static SbcControlStation controlStation;
 	private static ShellExecutor executor;
 	private static Communications communications;
 	private static SbcState currentState;
@@ -115,8 +115,10 @@ public abstract class SbcBot {
 			log.reportError(e.getMessage());
 			shutdown(1);
 		}
+		controlStation = new SbcControlStation();
 		communications = new Communications("Robot", inter);
 		communications.attach(executor);
+		communications.attach(controlStation);
 		log.log("Done");
 		
 		log.logTime("Initialization Done");
@@ -144,12 +146,14 @@ public abstract class SbcBot {
 		communications.start();
 		userClass.startRobot();
 	}
-	private static ReadInterface setupCommInterface() throws SocketException{
+	private static ReadInterface setupCommInterface() throws IOException{
 		int port = properties.getIntegerProperty(PROP_COMM_PORT);
 		if(port <= 0) return null;
 		String interfaceType = properties.getProperty(PROP_COMM_TYPE);
 		if(interfaceType.equalsIgnoreCase("udp"))
 			return new UDPReadInterface(port);
+        else if(interfaceType.equalsIgnoreCase("tcp"))
+			return new TCPReadInterface(port);
 		return null;
 	}
 	private static int getPortByBoard(){
@@ -234,7 +238,7 @@ public abstract class SbcBot {
 		return properties;
 	}
 	
-	public static SbcState currentState(){
+	public static SbcState getCurrentState(){
 		if (stateSelector != null) {
 			SbcState nState = stateSelector.getState();
 			currentState = nState != null? nState : SbcState.Disabled;
@@ -248,14 +252,17 @@ public abstract class SbcBot {
 		return currentState.value == SbcState.ENABLED;
 	}
 	
-	public static ShellExecutor shell(){
+	public static ShellExecutor getShell(){
 		return executor;
 	}
-	public static Communications communications(){
+	public static Communications getCommunications(){
 		return communications;
 	}
-	public static Board board(){
+	public static Board getBoard(){
 		return board;
+	}
+	public static SbcControlStation getControlStation(){
+		return controlStation;
 	}
 	public static String getBoardName(){
 		return board.getName();

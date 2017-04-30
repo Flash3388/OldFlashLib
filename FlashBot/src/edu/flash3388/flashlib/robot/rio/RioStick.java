@@ -1,12 +1,13 @@
-package edu.flash3388.flashlib.robot.hid;
+package edu.flash3388.flashlib.robot.rio;
 
+import edu.flash3388.flashlib.robot.hid.Stick;
 import edu.wpi.first.wpilibj.DriverStation;
 
-public class StickRio extends Stick{
+public class RioStick extends Stick{
 
 	private int stick, axisX, axisY;
 	
-	public StickRio(int stick, int axisX, int axisY){
+	public RioStick(int stick, int axisX, int axisY){
 		this.axisX = axisX;
 		this.stick = stick;
 		this.axisY = axisY;

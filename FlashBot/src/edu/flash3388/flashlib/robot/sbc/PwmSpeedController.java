@@ -30,12 +30,6 @@ public class PwmSpeedController implements FlashSpeedController {
 	}
 
 	@Override
-	public void set(double speed, Direction direction) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void stop() {
 		// TODO Auto-generated method stub
 		

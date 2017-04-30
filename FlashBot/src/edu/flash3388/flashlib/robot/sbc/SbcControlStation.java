@@ -4,12 +4,9 @@ import java.util.Arrays;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
+import edu.flash3388.flashlib.util.FlashUtil;
 
 public final class SbcControlStation extends Sendable{
-
-	public static final short MAX_CONTROLLERS = 3;
-	public static final short CONTROLLER_AXES = 6;
-	private static final byte CONTROLLER_DATA_SIZE = 100;
 	
 	private static class ControllerButtons{
 		byte count;
@@ -52,46 +49,178 @@ public final class SbcControlStation extends Sendable{
 		
 		@Override
 		public void run() {
+			cs.task();
 		}
 	}
 	
-	private short[][] controllerAxes = new short[MAX_CONTROLLERS][CONTROLLER_AXES];
+	public static final byte MAX_CONTROLLERS = 3;
+	public static final byte CONTROLLER_AXES = 6;
+	private static final byte CONTROLLER_DATA_SIZE = 100;
+	
+	private byte[][] controllerAxes = new byte[MAX_CONTROLLERS][CONTROLLER_AXES];
 	private short[] controllerPovs = new short[MAX_CONTROLLERS];
 	private ControllerButtons[] controllerButtons = new ControllerButtons[MAX_CONTROLLERS];
-	private byte[][] controllersData = new byte[2][CONTROLLER_DATA_SIZE];
-	private byte dataIndex = 0;
+	private byte[] controllersData = new byte[CONTROLLER_DATA_SIZE];
+	private byte connectedControllers = 0;
+	private byte stateByte = 0;
+	private boolean updateData = true;
+	private boolean stop = false;
+	
+	private Object recieveObject = new Object(), waitObject = new Object();
 	
 	private ControlSendableData senData;
 	private UpdateTask upTask;
 	private Thread csThread;
 	
 	SbcControlStation() {
-		super("CS-"+SbcBot.getBoardName(), (byte)0x0);
+		super("CS-"+SbcBot.getBoardName(), SbcSendableType.CONSTROL_STATION);
 		
 		for (int i = 0; i < controllerButtons.length; i++)
 			controllerButtons[i] = new ControllerButtons();
 		senData = new ControlSendableData(this);
 		upTask = new UpdateTask(this);
 		csThread = new Thread(upTask, "CS-Update");
-		csThread.setPriority((Thread.MAX_PRIORITY + Thread.MIN_PRIORITY) / 2);
+		csThread.setPriority((Thread.MAX_PRIORITY + Thread.NORM_PRIORITY) / 2);
 		csThread.start();
 	}
-
-	private void updateControllers(){
+	void stop(){
+		stop = true;
+		stateByte = 0;
+	}
+	
+	private void task(){
+		while(!stop){
+			synchronized (recieveObject) {
+				try {
+					recieveObject.wait();
+				} catch (InterruptedException e) {
+				}
+			}
+			synchronized (controllersData) {
+				update();
+			}
+			synchronized (waitObject) {
+				waitObject.notifyAll();
+			}
+		}
+	}
+	private void update(){
+		updateData = false;
+		int pos = 0;
 		
+		byte[] data = controllersData;
+		stateByte = data[pos++];
+		connectedControllers = data[pos++];
+		int j = 0;
+		for(int i = 0; i < MAX_CONTROLLERS; i++){
+			if((connectedControllers & (0x01 << (i + 1))) == 0)
+				continue;
+			for(j = 0; j < CONTROLLER_AXES; j++)
+				controllerAxes[i][j] = data[pos++];
+			
+			controllerButtons[i].count = data[pos++];
+			controllerButtons[i].buttons = 0;
+			controllerButtons[i].buttons = ((short) data[pos++]);
+			controllerButtons[i].buttons |= (data[pos++] << (controllerButtons[i].count >> 2));
+			
+			controllerPovs[i] = ((short) data[pos++]);
+			controllerPovs[i] |= (data[pos++] << (controllerButtons[i].count >> 2));
+		}
+		
+		updateData = true;
 	}
 	
 	@Override
 	public void newData(byte[] data) {
-		if(data.length < CONTROLLER_DATA_SIZE / 2) {
-			return;
-		}
-		if(data.length != controllersData[1 - dataIndex].length)
-			controllersData[1 - dataIndex] = Arrays.copyOf(data, data.length);
+		if(!updateData) return;
+		
+		if(data.length != controllersData.length)
+			controllersData = Arrays.copyOf(data, data.length);
 		else System.arraycopy(data, 0, controllersData, 0, data.length);
+		
+		synchronized (recieveObject) {
+			recieveObject.notifyAll();	
+		}
 	}
 	@Override
 	public SendableData dataForTransmition() {
-		return null;
+		return senData;
+	}
+	
+	public void waitForData(){
+		waitForData(0);
+	}
+	public void waitForData(long timeout){
+		synchronized (waitObject) {
+			try {
+				waitObject.wait(timeout);
+			} catch (InterruptedException e) {
+			}	
+		}
+	}
+	
+	public boolean isStickConnected(int stick){
+		if(stick < 0 || stick >= MAX_CONTROLLERS)
+			throw new IndexOutOfBoundsException("Stick index is out of bounds: "+stick);
+		return (connectedControllers & (0x01 << (stick + 1))) != 0;
+	}
+	public int getStickCount(){
+		int count = 0;
+		for (int i = 1; i <= MAX_CONTROLLERS; i++) {
+			if((connectedControllers & (0x01 << i)) != 0)
+				count++;
+		}
+		return count;
+	}
+	public double getStickAxis(int stick, int axis){
+		if(!isStickConnected(stick)){
+			FlashUtil.getLog().reportWarning("Controller "+stick+" is not connected");
+			return 0;
+		}
+		if(axis < 0 || axis >= CONTROLLER_AXES)
+			throw new IndexOutOfBoundsException("Axis index is out of bounds: "+axis);
+		
+		byte data = controllerAxes[stick][axis];
+		return data < 0? data / 128.0 : data / 127.0;
+	}
+	public boolean getStickButton(int stick, byte button){
+		if(!isStickConnected(stick)){
+			FlashUtil.getLog().reportWarning("Controller "+stick+" is not connected");
+			return false;
+		}
+		if(button < 1)
+			throw new IndexOutOfBoundsException("Button index is out of bounds: "+button);
+		if(button > controllerButtons[stick].count){
+			FlashUtil.getLog().reportWarning("Button "+button+" on controller "+stick+" is unavailable");
+			return false;
+		}
+		
+		return (controllerButtons[stick].buttons & (0x01 << button)) != 0;
+	}
+	public int getButtonsCount(int stick){
+		if(!isStickConnected(stick)){
+			FlashUtil.getLog().reportWarning("Controller "+stick+" is not connected");
+			return 0;
+		}
+		
+		return controllerButtons[stick].count;
+	}
+	public int getStickPOV(int stick){
+		if(!isStickConnected(stick)){
+			FlashUtil.getLog().reportWarning("Controller "+stick+" is not connected");
+			return 0;
+		}
+		
+		return (int)controllerPovs[stick];
+	}
+	
+	public boolean isDisabled(){
+		return stateByte == 0 || (!senData.attached);
+	}
+	public boolean isCSAttached(){
+		return senData.attached;
+	}
+	public int getState(){
+		return stateByte;
 	}
 }

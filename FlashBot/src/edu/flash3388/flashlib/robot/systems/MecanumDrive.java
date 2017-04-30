@@ -47,7 +47,7 @@ public class MecanumDrive extends System implements HolonomicDriveSystem, Voltag
 		}
 
 		private int getRotationDirection(double currentAngle) {
-			return currentAngle > movmentAngle ? Direction.Right.value : Direction.Left.value;
+			return currentAngle > movmentAngle ? Direction.RIGHT : Direction.LEFT;
 		}
 
 		public void stabilize(double magnitude, double direction, double[] wheelSpeeds) {

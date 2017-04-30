@@ -1,5 +1,6 @@
-package edu.flash3388.flashlib.robot.hid;
+package edu.flash3388.flashlib.robot.rio;
 
+import edu.flash3388.flashlib.robot.hid.Button;
 import edu.wpi.first.wpilibj.DriverStation;
 
 public class RioButton extends Button{

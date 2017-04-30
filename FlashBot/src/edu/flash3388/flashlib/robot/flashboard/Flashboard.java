@@ -1,25 +1,39 @@
 package edu.flash3388.flashlib.robot.flashboard;
 
 import java.io.IOException;
-import java.net.SocketException;
 
 import edu.flash3388.flashlib.cams.Camera;
 import edu.flash3388.flashlib.cams.CameraView;
 import edu.flash3388.flashlib.communications.CameraServer;
 import edu.flash3388.flashlib.communications.CommInfo;
 import edu.flash3388.flashlib.communications.Communications;
+import edu.flash3388.flashlib.communications.ReadInterface;
 import edu.flash3388.flashlib.communications.Sendable;
+import edu.flash3388.flashlib.communications.TCPReadInterface;
 import edu.flash3388.flashlib.communications.UDPReadInterface;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.flash3388.flashlib.vision.RemoteVision;
 
 public class Flashboard {
 	
-	private static boolean instance = false;
+	private static boolean instance = false, tcp = false;
 	private static CameraView camViewer;
 	private static CameraServer camServer;
 	private static RemoteVision vision;
 	private static Communications communications;
+	
+	public static void setProtocolTcp(){
+		tcp = true;
+	}
+	public static void setProtocolUdp(){
+		tcp = false;
+	}
+	public static boolean isProtocolTcp(){
+		return tcp;
+	}
+	public static boolean isProtocolUdp(){
+		return !tcp;
+	}
 	
 	public static void attach(Sendable sendable){
 		if(!instance) return;
@@ -75,9 +89,18 @@ public class Flashboard {
 	}
 	
 	public static void init(CommInfo info){
+		init(info, tcp);
+	}
+	public static void init(CommInfo info, boolean tcp){
 		if(!instance || info == null){
+			Flashboard.tcp = tcp;
 			try {
-				communications = new Communications("Flashboard", new UDPReadInterface(info.localPort));
+				ReadInterface readi;
+				if(tcp)
+					readi = new TCPReadInterface(info.localPort);
+				else readi = new UDPReadInterface(info.localPort);
+				
+				communications = new Communications("Flashboard", readi);
 				vision = new RemoteVision();
 				camViewer = new CameraView("Flashboard-CamViewer", null, new Camera[]{});
 				camServer = new CameraServer("Flashboard", info.camPort, camViewer);
@@ -85,7 +108,7 @@ public class Flashboard {
 				
 				instance = true;
 				FlashUtil.getLog().logTime("FLASHBoard: Initialized at port " + info.localPort);
-			} catch (SocketException e) {
+			} catch (IOException e) {
 				FlashUtil.getLog().reportError(e.getMessage());
 			}
 		}

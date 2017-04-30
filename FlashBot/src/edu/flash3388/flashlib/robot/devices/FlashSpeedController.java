@@ -6,7 +6,6 @@ import edu.flash3388.flashlib.robot.systems.ModableMotor;
 public interface FlashSpeedController extends ModableMotor{
 	void set(double speed);
 	void set(double speed, int direction);
-	void set(double speed, Direction direction);
 	
 	void stop();
 	

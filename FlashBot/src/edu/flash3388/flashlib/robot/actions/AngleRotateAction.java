@@ -78,7 +78,7 @@ public class AngleRotateAction extends Action implements VoltageScalable{
 			speed /= 2;
 		}
 		
-		double angularDistance = direction == Direction.Right.value ? toAngle : 360 - toAngle;
+		double angularDistance = direction == Direction.RIGHT ? toAngle : 360 - toAngle;
 		double rotateSpeed = speed * (angularDistance / 100.0);
 		FlashUtil.getLog().log("Speed: "+speed+" --- SpeedN: "+rotateSpeed+" \nDirection: "+direction+" CurrentAngle: "+currentAngle
 				+" To angle: "+toAngle);
@@ -107,7 +107,7 @@ public class AngleRotateAction extends Action implements VoltageScalable{
 	private void calculatePositioning(){
 		currentAngle = Mathd.limitAngle(gyro.getAngle() - angleConversion);
 		toAngle = Mathd.limitAngle(desiredAngle - currentAngle + angleAddition);
-		direction = (toAngle <= 180)? Direction.Right.value : Direction.Left.value;
+		direction = (toAngle <= 180)? Direction.RIGHT : Direction.LEFT;
 	}
 	
 	public void setSpeed(double speed){

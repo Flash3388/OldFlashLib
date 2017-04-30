@@ -1,4 +1,4 @@
-package edu.flash3388.flashlib.robot.devices;
+package edu.flash3388.flashlib.robot.rio;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +7,7 @@ import java.util.List;
 import com.ctre.CANTalon;
 
 import edu.flash3388.flashlib.robot.Direction;
+import edu.flash3388.flashlib.robot.devices.FlashSpeedController;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Talon;
@@ -149,10 +150,6 @@ public class RioControllers implements FlashSpeedController{
 		
 		for(SpeedController c : motor_controllers)
 			c.set(speed * direction);
-	}
-	@Override
-	public void set(double speed, Direction direction) {
-		set(speed, direction.value);
 	}
 	@Override
 	public void stop() {

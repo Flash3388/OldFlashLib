@@ -1,12 +1,13 @@
-package edu.flash3388.flashlib.robot.hid;
+package edu.flash3388.flashlib.robot.rio;
 
+import edu.flash3388.flashlib.robot.hid.DPad;
 import edu.wpi.first.wpilibj.DriverStation;
 
-public class DpadRio extends DPad{
+public class RioDpad extends DPad{
 
 	private int stick;
 	
-	public DpadRio(int stick) {
+	public RioDpad(int stick) {
 		super(stick);
 		this.stick = stick;
 	}
@@ -18,7 +19,7 @@ public class DpadRio extends DPad{
 	
 	@Override
 	public void refresh(){
-		int degrees = DriverStation.getInstance().getStickPOV(stick, 0);
+		int degrees = get();
 		Up.set(degrees);
 		Down.set(degrees);
 		Left.set(degrees);

@@ -1,10 +1,9 @@
-package edu.flash3388.flashlib.robot;
+package edu.flash3388.flashlib.robot.sbc;
 
 import java.io.IOException;
 
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
-import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
 import edu.flash3388.flashlib.util.FlashUtil;
 
 public class ShellExecutor extends Sendable{
@@ -68,7 +67,7 @@ public class ShellExecutor extends Sendable{
 	private ShellData data = new ShellData();
 	
 	public ShellExecutor(){
-		super("Shell", FlashboardSendableType.RSHELL);
+		super("Shell", SbcSendableType.SHELL_EXECUTOR);
 		data.executor = this;
 	}
 

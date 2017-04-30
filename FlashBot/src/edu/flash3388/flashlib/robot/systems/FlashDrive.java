@@ -611,8 +611,8 @@ public class FlashDrive extends System implements TankDriveSystem{
 		r = limit(r);
 		l = limit(l);
 		
-		if(right_controllers != null) right_controllers.set(r * Direction.Backward.value);
-		if(left_controllers != null) left_controllers.set(l * Direction.Backward.value);
+		if(right_controllers != null) right_controllers.set(r * Direction.BACKWARD);
+		if(left_controllers != null) left_controllers.set(l * Direction.BACKWARD);
 	}
 	@Override 
 	public void backward(double speed){
@@ -640,8 +640,8 @@ public class FlashDrive extends System implements TankDriveSystem{
 		f = limit(f);
 		r = limit(r);
 		
-		if(front_controllers != null) front_controllers.set(f * Direction.Forward.value);
-		if(rear_controllers != null) rear_controllers.set(r * Direction.Forward.value);
+		if(front_controllers != null) front_controllers.set(f * Direction.FORWARD);
+		if(rear_controllers != null) rear_controllers.set(r * Direction.FORWARD);
 	}
 	@Override 
 	public void right(double speed){
@@ -662,8 +662,8 @@ public class FlashDrive extends System implements TankDriveSystem{
 		f = limit(f);
 		r = limit(r);
 		
-		if(front_controllers != null) front_controllers.set(f * Direction.Backward.value);
-		if(rear_controllers != null) rear_controllers.set(r * Direction.Backward.value);
+		if(front_controllers != null) front_controllers.set(f * Direction.BACKWARD);
+		if(rear_controllers != null) rear_controllers.set(r * Direction.BACKWARD);
 	}
 	@Override 
 	public void left(double speed){
@@ -686,11 +686,11 @@ public class FlashDrive extends System implements TankDriveSystem{
 		speed = limit(speed);
 		direction = (direction != 1 && direction != -1)? direction/Math.abs(direction) : direction;
 		
-		if(right_controllers != null) right_controllers.set(speed * direction * Direction.Backward.value);
-		if(left_controllers != null) left_controllers.set(speed * direction * Direction.Forward.value);
+		if(right_controllers != null) right_controllers.set(speed * direction * Direction.BACKWARD);
+		if(left_controllers != null) left_controllers.set(speed * direction * Direction.FORWARD);
 		
-		if(front_controllers != null) front_controllers.set(speed * direction * Direction.Backward.value); 
-		if(rear_controllers != null) rear_controllers.set(speed * direction * Direction.Forward.value); 
+		if(front_controllers != null) front_controllers.set(speed * direction * Direction.BACKWARD); 
+		if(rear_controllers != null) rear_controllers.set(speed * direction * Direction.FORWARD); 
 	}
 	
 	/*public void rotate(int angle){
@@ -720,10 +720,10 @@ public class FlashDrive extends System implements TankDriveSystem{
 		
 		speed = limit(speed);
 		
-		if(right_controllers != null) right_controllers.set(speed * Direction.Backward.value);
-		if(left_controllers != null) left_controllers.set(speed * Direction.Forward.value);
-		if(front_controllers != null) front_controllers.set(speed * Direction.Backward.value); 
-		if(rear_controllers != null) rear_controllers.set(speed * Direction.Forward.value); 
+		if(right_controllers != null) right_controllers.set(speed * Direction.BACKWARD);
+		if(left_controllers != null) left_controllers.set(speed * Direction.FORWARD);
+		if(front_controllers != null) front_controllers.set(speed * Direction.BACKWARD); 
+		if(rear_controllers != null) rear_controllers.set(speed * Direction.FORWARD); 
 	}
 	public void rotateRight(){
 		rotateRight(default_speed);
@@ -740,10 +740,10 @@ public class FlashDrive extends System implements TankDriveSystem{
 		
 		speed = limit(speed);
 		
-		if(right_controllers != null) right_controllers.set(speed * Direction.Forward.value);
-		if(left_controllers != null) left_controllers.set(speed * Direction.Backward.value);
-		if(front_controllers != null) front_controllers.set(speed * Direction.Forward.value); 
-		if(rear_controllers != null) rear_controllers.set(speed * Direction.Backward.value); 
+		if(right_controllers != null) right_controllers.set(speed * Direction.FORWARD);
+		if(left_controllers != null) left_controllers.set(speed * Direction.BACKWARD);
+		if(front_controllers != null) front_controllers.set(speed * Direction.FORWARD); 
+		if(rear_controllers != null) rear_controllers.set(speed * Direction.BACKWARD); 
 	}
 	public void rotateLeft(){
 		rotateLeft(default_speed);

@@ -7,7 +7,7 @@ import com.ctre.CANTalon;
 import edu.flash3388.flashlib.communications.Sendable;
 import edu.flash3388.flashlib.communications.SendableData;
 import edu.flash3388.flashlib.flashboard.FlashboardSendableType;
-import edu.flash3388.flashlib.robot.devices.RioControllers;
+import edu.flash3388.flashlib.robot.rio.RioControllers;
 import edu.flash3388.flashlib.util.FlashUtil;
 import edu.wpi.first.wpilibj.Jaguar;
 import edu.wpi.first.wpilibj.SpeedController;
