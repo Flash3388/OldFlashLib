@@ -1,6 +1,5 @@
-
 # Attention! The official repository was moved to: https://github.com/Flash3388/FlashLib.
-# This repository is now obsolete.
+This repository is now obsolete.
 
 
 Welcome to FLASHLib, an extensive Java library providing algorithms and functionalities for a large amount of fields in programming.
